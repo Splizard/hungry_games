@@ -59,16 +59,13 @@ minetest.register_on_generated(function(minp, maxp, seed)
 				table.insert(invcontent, 'throwing:bow_steel 1')
 			end
 			if rand:next(1,10) == 1 then
-				table.insert(invcontent, 'food:bread 1')
+				table.insert(invcontent, 'bread:bread 1')
 			end
 			if rand:next(1,5) == 1 then
-				table.insert(invcontent, 'food:bun 1')
+				table.insert(invcontent, 'bread:bun 1')
 			end
 			if rand:next(1,3) == 1 then
-				table.insert(invcontent, 'food:bread_slice 1')
-			end
-			if rand:next(1,4) == 1 then
-				table.insert(invcontent, 'food:cup 1')
+				table.insert(invcontent, 'bread:slice 1')
 			end
 			if rand:next(1,4) == 1 then
 				table.insert(invcontent, 'throwing:arrow '..tostring(rand:next(1,6)))
