@@ -1,0 +1,3 @@
+code: cc-by-sa casimir
+
+sounds: WTFPL by randomproof
