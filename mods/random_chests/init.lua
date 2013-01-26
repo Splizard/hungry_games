@@ -1,4 +1,13 @@
---local random_seed = math.random(0,1000)
+local random_items = {}
+
+random_chests = {}
+--Regester a new item that can be spawned in random chests.
+--eg random_chests.register_item('default:torch', 4, 6) #has a 1 in 4 chance of spawning up to 6 torches.
+function random_chests.register_item(item, rarity, max)
+	assert(item and rarity and max)
+	table.insert(random_items, {item, rarity, max})
+end
+
 
 minetest.register_on_generated(function(minp, maxp, seed)
 	for i=0, 3 do
@@ -16,65 +25,11 @@ minetest.register_on_generated(function(minp, maxp, seed)
 		if ground then
 			local invcontent = {}
 			local pos = {x=pos.x,y=ground+1,z=pos.z}
-			--local rand = PseudoRandom(seed+random_seed)
-			local rand = {}
-			function rand:next(x,y) return math.random(x,y) end
-			if rand:next(1,4) == 1 then
-				table.insert(invcontent, 'default:apple '..tostring(rand:next(1,5)))
-			end
-			if rand:next(1,8) == 1 then
-				table.insert(invcontent, 'default:ladder '..tostring(rand:next(1,5)))
-			end
-			if rand:next(1,4) == 1 then
-				table.insert(invcontent, 'default:torch '..tostring(rand:next(1,6)))
-			end
-			if rand:next(1,3) == 1 then
-				table.insert(invcontent, 'default:sword_wood 1')
-			end
-			if rand:next(1,3) == 1 then
-				table.insert(invcontent, 'default:axe_wood 1')
-			end
-			if rand:next(1,5) == 1 then
-				table.insert(invcontent, 'default:axe_stone 1')
-			end
-			if rand:next(1,10) == 1 then
-				table.insert(invcontent, 'default:axe_steel 1')
-			end
-			if rand:next(1,3) == 1 then
-				table.insert(invcontent, 'throwing:bow_wood 1')
-			end
-			if rand:next(1,20) == 1 then
-				table.insert(invcontent, 'bucket:bucket_lava 1')
-			end
-			if rand:next(1,5) == 1 then
-				table.insert(invcontent, 'default:sword_stone 1')
-			end
-			if rand:next(1,5) == 1 then
-				table.insert(invcontent, 'throwing:bow_stone 1')
-			end
-			if rand:next(1,10) == 1 then
-				table.insert(invcontent, 'default:sword_steel 1')
-			end
-			if rand:next(1,10) == 1 then
-				table.insert(invcontent, 'throwing:bow_steel 1')
-			end
-			if rand:next(1,10) == 1 then
-				table.insert(invcontent, 'bread:bread 1')
-			end
-			if rand:next(1,5) == 1 then
-				table.insert(invcontent, 'bread:bun 1')
-			end
-			if rand:next(1,3) == 1 then
-				table.insert(invcontent, 'bread:slice 1')
-			end
-			if rand:next(1,4) == 1 then
-				table.insert(invcontent, 'throwing:arrow '..tostring(rand:next(1,6)))
-			end
-			if rand:next(1,6) == 1 then
-				table.insert(invcontent, 'throwing:arrow_fire '..tostring(rand:next(1,6)))
-			end
-			if rand:next(1,20) == 1 then
-				table.insert(invcontent, 'throwing:arrow_teleport '..tostring(rand:next(1,6)))
+			--Spawn items in chest
+			for i,v in pairs(random_items) do
+				if math.random(1, v[2]) == 1 then
+					table.insert(invcontent, v[1].." "..tostring(math.random(1,v[3])) )
+				end
 			end
 			env:add_node(pos,{name='default:chest', inv=invcontent})	
 			local meta = minetest.env:get_meta(pos)
@@ -82,7 +37,7 @@ minetest.register_on_generated(function(minp, maxp, seed)
 			for _,itemstring in ipairs(invcontent) do
 				inv:add_item('main', itemstring)
 			end
-			print("spawn near "..pos.x.." "..pos.z)
+			--print("spawn near "..pos.x.." "..pos.z)
 		end
 	end	
 end)

@@ -1,0 +1,6 @@
+default
+random_chests
+glass_arena
+dead_drop
+bread
+throwing
