@@ -42,25 +42,27 @@ local glass_arena = {}
 
 glass_arena.rise = function(player)
 	local pos = player:getpos()
-	if minetest.env:get_node({x=pos.x,y=pos.y+1,z=pos.z}) ~= "air" then
-		for y=0, 100 do
-			local node = minetest.env:get_node({x=pos.x,y=y,z=pos.z})
-			if node.name == "ignore" then
-				player:setpos({x=pos.x,y=pos.y+y+1,z=pos.z})
-				minetest.after(2, glass_arena.rise, player)
-				return
-			end
-			if minetest.env:get_node_light({x=pos.x,y=y,z=pos.z}, 0.5) > 5 then
-				if node.name == "air" then
+	if pos then
+		if minetest.env:get_node({x=pos.x,y=pos.y+1,z=pos.z}) ~= "air" then
+			for y=0, 100 do
+				local node = minetest.env:get_node({x=pos.x,y=y,z=pos.z})
+				if node.name == "ignore" then
 					player:setpos({x=pos.x,y=pos.y+y+1,z=pos.z})
+					minetest.after(2, glass_arena.rise, player)
 					return
-				elseif node.name == "default:water_source" then
-					player:setpos({x=pos.x,y=pos.y+y+1,z=pos.z})
-					return 
+				end
+				if minetest.env:get_node_light({x=pos.x,y=y,z=pos.z}, 0.5) > 5 then
+					if node.name == "air" then
+						player:setpos({x=pos.x,y=pos.y+y+1,z=pos.z})
+						return
+					elseif node.name == "default:water_source" then
+						player:setpos({x=pos.x,y=pos.y+y+1,z=pos.z})
+						return 
+					end
 				end
 			end
+			player:setpos({x=pos.x,y=pos.y+200,z=pos.z})
 		end
-		player:setpos({x=pos.x,y=pos.y+200,z=pos.z})
 	end
 end
 
