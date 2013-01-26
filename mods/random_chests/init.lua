@@ -1,4 +1,4 @@
-local random_seed = math.random(0,1000)
+--local random_seed = math.random(0,1000)
 
 minetest.register_on_generated(function(minp, maxp, seed)
 	for i=0, 3 do
@@ -16,7 +16,9 @@ minetest.register_on_generated(function(minp, maxp, seed)
 		if ground then
 			local invcontent = {}
 			local pos = {x=pos.x,y=ground+1,z=pos.z}
-			local rand = PseudoRandom(seed+random_seed)
+			--local rand = PseudoRandom(seed+random_seed)
+			local rand = {}
+			function rand:next(x,y) return math.random(x,y) end
 			if rand:next(1,4) == 1 then
 				table.insert(invcontent, 'default:apple '..tostring(rand:next(1,5)))
 			end
