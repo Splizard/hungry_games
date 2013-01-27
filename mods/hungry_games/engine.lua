@@ -1,46 +1,49 @@
 local votes = 0
+local ingame = false
 
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
-	local players = minetest.get_connected_players() 
-	local winner = ""
-	local counter = table.getn(players)
-	for _,player in ipairs(players) do
-		local name = player:get_player_name()
-	   	local privs = minetest.get_player_privs(name)
-		if privs.privs or privs.server then
-			--server admins are not counted.
-			counter = counter - 1
-		elseif not privs.interact then
-			counter = counter - 1
-		elseif player:get_hp() < 1 then
-			counter = counter - 1
-		end
-	end
-	if counter <= 1 then
+	if ingame then
+		local players = minetest.get_connected_players() 
+		local winner = ""
+		local counter = table.getn(players)
 		for _,player in ipairs(players) do
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
 			if privs.privs or privs.server then
 				--server admins are not counted.
-			elseif privs.interact and player:get_hp() > 0 then
-				minetest.chat_send_player(name, "You Won!!")
-				winner = name
-				privs.fast = true
-				privs.fly = true
-				privs.interact = false
-				minetest.set_player_privs(name, privs)
-				minetest.auth_reload()
-				minetest.chat_send_player(name, "You are now spectating")
+				counter = counter - 1
+			elseif not privs.interact then
+				counter = counter - 1
+			elseif player:get_hp() < 1 then
+				counter = counter - 1
 			end
 		end
-		for _,player in ipairs(players) do
-			local name = player:get_player_name()
-		   	local privs = minetest.get_player_privs(name)
-			minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
-			privs.vote = true
-			minetest.set_player_privs(name, privs)
-			minetest.auth_reload()
+		if counter <= 1 then
+			for _,player in ipairs(players) do
+				local name = player:get_player_name()
+			   	local privs = minetest.get_player_privs(name)
+				if privs.privs or privs.server then
+					--server admins are not counted.
+				elseif privs.interact and player:get_hp() > 0 then
+					minetest.chat_send_player(name, "You Won!!")
+					winner = name
+					privs.fast = true
+					privs.fly = true
+					privs.interact = false
+					minetest.set_player_privs(name, privs)
+					minetest.auth_reload()
+					minetest.chat_send_player(name, "You are now spectating")
+				end
+			end
+			for _,player in ipairs(players) do
+				local name = player:get_player_name()
+			   	local privs = minetest.get_player_privs(name)
+				minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
+				privs.vote = true
+				minetest.set_player_privs(name, privs)
+				minetest.auth_reload()
+			end
 		end
 	end
 end)
@@ -81,6 +84,49 @@ minetest.register_on_leaveplayer(function(player)
 				spawning.spawn(player)
 			end
 			votes = 0
+		end
+		if ingame then
+			local players = minetest.get_connected_players() 
+			local winner = ""
+			local counter = table.getn(players)
+			for _,player in ipairs(players) do
+				local name = player:get_player_name()
+			   	local privs = minetest.get_player_privs(name)
+				if privs.privs or privs.server then
+					--server admins are not counted.
+					counter = counter - 1
+				elseif not privs.interact then
+					counter = counter - 1
+				elseif player:get_hp() < 1 then
+					counter = counter - 1
+				end
+			end
+			if counter <= 1 then
+				for _,player in ipairs(players) do
+					local name = player:get_player_name()
+				   	local privs = minetest.get_player_privs(name)
+					if privs.privs or privs.server then
+						--server admins are not counted.
+					elseif privs.interact and player:get_hp() > 0 then
+						minetest.chat_send_player(name, "You Won!!")
+						winner = name
+						privs.fast = true
+						privs.fly = true
+						privs.interact = false
+						minetest.set_player_privs(name, privs)
+						minetest.auth_reload()
+						minetest.chat_send_player(name, "You are now spectating")
+					end
+				end
+				for _,player in ipairs(players) do
+					local name = player:get_player_name()
+				   	local privs = minetest.get_player_privs(name)
+					minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
+					privs.vote = true
+					minetest.set_player_privs(name, privs)
+					minetest.auth_reload()
+				end
+			end
 		end
 	end)
 end)
@@ -125,10 +171,11 @@ minetest.register_chatcommand("hg", {
 					minetest.auth_reload()
 					minetest.chat_send_player(name, "The Hunger Games has begun!")
 				end
-				votes = 0
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
+			ingame = true
+			votes = 0
 		--Stops Game.
 		elseif parms[1] == "stop" then
 			for _,player in ipairs(minetest.get_connected_players()) do
@@ -184,6 +231,7 @@ minetest.register_chatcommand("vote", {
 				spawning.spawn(player)
 			end
 			votes = 0
+			ingame = true
 		end
 	end,
 })
