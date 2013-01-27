@@ -176,9 +176,10 @@ minetest.register_on_generated(function(minp, maxp, seed)
 		end
 	end
 	--Speed up generation by checking if this chunk needs to be proccesed.
-	if not ((minp.x > arena_size and minp.z > arena_size) or (maxp.x < -arena_size and maxp.z < -arena_size)) and
+	if not ((minp.x > arena_size or minp.z > arena_size) or (maxp.x < -arena_size or maxp.z < -arena_size)) and
 	   not ((minp.x > -arena_size and maxp.x < arena_size) and (minp.z > -arena_size and maxp.z < arena_size)) then
-
+			
+			print("chunk found")
 			--Should make things a bit faster.
 			local env = minetest.env
 			local gen
@@ -286,5 +287,6 @@ minetest.register_on_generated(function(minp, maxp, seed)
 			end
 		end
 	end
+	print("chunk processed")
 end)
 
