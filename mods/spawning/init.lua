@@ -12,6 +12,6 @@ function spawning.on_death(mode)
 			minetest.set_player_privs(name, privs)
 			minetest.auth_reload()
 			minetest.chat_send_player(name, "You are now spectating")
-		end
+		end)
 	end
 end
