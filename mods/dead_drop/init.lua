@@ -1,8 +1,8 @@
---Drop the item the player was holding
 minetest.register_on_dieplayer(function(player)
 		local pos = player:getpos()
 		inv = player:get_inventory()
 		inventorylist = inv:get_list("main")
+		--Drop all players items
 		for i,v in pairs(inventorylist) do
             obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
             if obj ~= nil then

@@ -13,6 +13,13 @@ glass_arena.set_size(200)
 glass_arena.set_texture("default_glass.png") 
 
 -----------------------------------
+--------Spawn configuration--------
+
+--Set what happens to players on death.
+--Defaults to nothing.
+spawning.on_death("spectate")
+
+-----------------------------------
 --------Chest configuration--------
 local chest_item = random_chests.register_item
 
