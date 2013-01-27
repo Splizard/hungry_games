@@ -130,6 +130,8 @@ minetest.register_abm({
     			env:add_node({x=pos.x+1,y=pos.y,z=pos.z},{name="glass_arena:wall_end"})
     		elseif pos.x == -arena_size - 1 then
     			env:add_node({x=pos.x+1,y=pos.y,z=pos.z},{name="glass_arena:wall"})
+    		else
+    			env:add_node({x=pos.x+1,y=pos.y,z=pos.z},{name="glass_arena:wall_middle"})
     		end
     	end
     	if should_replace({x=pos.x-1,y=pos.y,z=pos.z}) then
@@ -137,6 +139,8 @@ minetest.register_abm({
     			env:add_node({x=pos.x-1,y=pos.y,z=pos.z},{name="glass_arena:wall"})
     		elseif pos.x == -arena_size - 1 then
     			env:add_node({x=pos.x-1,y=pos.y,z=pos.z},{name="glass_arena:wall_end"})
+    		else
+    			env:add_node({x=pos.x-1,y=pos.y,z=pos.z},{name="glass_arena:wall_middle"})
     		end
     	end
     	if should_replace({x=pos.x,y=pos.y,z=pos.z+1}) then
@@ -144,6 +148,8 @@ minetest.register_abm({
     			env:add_node({x=pos.x,y=pos.y,z=pos.z+1},{name="glass_arena:wall_end"})
     		elseif pos.z == -arena_size - 1 then
     			env:add_node({x=pos.x,y=pos.y,z=pos.z+1},{name="glass_arena:wall"})
+    		else
+    			env:add_node({x=pos.x,y=pos.y,z=pos.z+1},{name="glass_arena:wall_middle"})
     		end
     	end
     	if should_replace({x=pos.x,y=pos.y,z=pos.z-1}) then
@@ -151,6 +157,8 @@ minetest.register_abm({
     			env:add_node({x=pos.x,y=pos.y,z=pos.z-1},{name="glass_arena:wall"})
     		elseif pos.z == -arena_size - 1 then
     			env:add_node({x=pos.x,y=pos.y,z=pos.z-1},{name="glass_arena:wall_end"})
+    		else
+    			env:add_node({x=pos.x,y=pos.y,z=pos.z-1},{name="glass_arena:wall_middle"})
     		end
     	end
     end,
@@ -178,8 +186,7 @@ minetest.register_on_generated(function(minp, maxp, seed)
 	--Speed up generation by checking if this chunk needs to be proccesed.
 	if not ((minp.x > arena_size or minp.z > arena_size) or (maxp.x < -arena_size or maxp.z < -arena_size)) and
 	   not ((minp.x > -arena_size and maxp.x < arena_size) and (minp.z > -arena_size and maxp.z < arena_size)) then
-			
-			print("chunk found")
+
 			--Should make things a bit faster.
 			local env = minetest.env
 			local gen
@@ -287,6 +294,5 @@ minetest.register_on_generated(function(minp, maxp, seed)
 			end
 		end
 	end
-	print("chunk processed")
 end)
 
