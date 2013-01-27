@@ -85,11 +85,14 @@ minetest.register_on_leaveplayer(function(player)
 	end)
 end)
 
+minetest.register_privilege("hg_admin", "Hungry Games Admin..")
+minetest.register_privilege("vote", "Privilege to vote.")
+
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
 	params = "<command>",
 	description = "Manage hungry_games",
-	privs = {privs=true},
+	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
 		local parms = {}
@@ -149,8 +152,6 @@ minetest.register_chatcommand("hg", {
 		end
 	end,
 })
-
-minetest.register_privilege("vote", "Privilege to vote.")
 
 minetest.register_chatcommand("vote", {
 	description = "Vote to start the Hungry Games",
