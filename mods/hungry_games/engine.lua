@@ -165,7 +165,7 @@ minetest.register_chatcommand("vote", {
 		local num = table.getn(players)
 		minetest.chat_send_player(name, "You have voted to begin! votes so far: "..votes.." votes needed: "..num)
 		if num == votes then
-			for _,player in players do
+			for _,player in pairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
 				if privs.privs or privs.server then
