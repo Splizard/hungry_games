@@ -4,7 +4,15 @@ local chests_spawn = true
 local chests_abm = false
 local chests_nodetimer = false
 local chests_interval = nil
+local chests_boundary = false
 
+-- Collision detection function.
+-- Checks if a and b overlap.
+-- w and h mean width and height.
+local function CheckCollision(ax1,ay1,aw,ah, bx1,by1,bw,bh)
+  local ax2,ay2,bx2,by2 = ax1 + aw, ay1 + ah, bx1 + bw, by1 + bh
+  return ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1
+end
 
 --Spawn items in chest
 local fill_chest = function(pos)
@@ -49,6 +57,12 @@ function random_chests.enable(b)
 	chests_spawn = b
 end
 
+--Enable/Disable chests to spawn.
+--Disable this if you want to hide your own chests in the world.
+function random_chests.set_boundary(n)
+	chests_boundary = tonumber(n)/2
+end
+
 --Refill chests
 function random_chests.setrefill(mode, interval)
 	if interval < 100 then
@@ -88,22 +102,27 @@ end
 --Spawning function.
 minetest.register_on_generated(function(minp, maxp, seed)
 	if chests_spawn then
-		for i=1, chest_rarity do
-			local pos = {x=math.random(minp.x,maxp.x),z=math.random(minp.z,maxp.z), y=minp.y}
-			local env = minetest.env
-			 -- Find ground level (0...15)
-			local ground = nil
-			for y=maxp.y,minp.y+1,-1 do
-				if env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "air" and env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "default:water_source" and env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "snow:snow" then
-					ground = y
-					break
-				end
-			end
+		local divs = maxp.x - minp.x
+		if chests_boundary == 0 or CheckCollision(minp.x,minp.z,divs,divs, -chests_boundary,-chests_boundary,chests_boundary*2,chests_boundary*2) then
+			for i=1, chest_rarity do
+				local pos = {x=math.random(minp.x,maxp.x),z=math.random(minp.z,maxp.z), y=minp.y}
+				if chests_boundary == 0 or CheckCollision(pos.x,pos.z,1,1, -chests_boundary,-chests_boundary,chests_boundary*2,chests_boundary*2) then
+					local env = minetest.env
+					 -- Find ground level (0...15)
+					local ground = nil
+					for y=maxp.y,minp.y+1,-1 do
+						if env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "air" and env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "default:water_source" and env:get_node({x=pos.x,y=y,z=pos.z}).name ~= "snow:snow" then
+							ground = y
+							break
+						end
+					end
 	
-			if ground then
-				fill_chest({x=pos.x,y=ground+1,z=pos.z})
-				--print("spawn near "..pos.x.." "..pos.z)
-			end
-		end	
+					if ground then
+						fill_chest({x=pos.x,y=ground+1,z=pos.z})
+						--print("spawn near "..pos.x.." "..pos.z)
+					end
+				end
+			end	
+		end
 	end
 end)

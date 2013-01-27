@@ -20,6 +20,11 @@ local chest_item = random_chests.register_item
 --Pass false if you want to hide your own chests in the world in creative.
 random_chests.enable()
 
+--Set the boundary where chests are spawned
+--Should be set to the same or smaller then the arena.
+--Defaults to whole map.
+random_chests.set_boundary(200)
+
 --Set Chest Rarity.
 --Rarity is how many chests per chunk.
 random_chests.set_rarity(3)
