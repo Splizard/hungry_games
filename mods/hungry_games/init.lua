@@ -3,6 +3,7 @@
 	You should edit this BEFORE generation of hungry_games worlds.
 	Feilds Marked with [SAFE] are safe to edit if you already have worlds generated.
 ]]--
+dofile(minetest.get_modpath("hungry_games").."/engine.lua")
 -----------------------------------
 --------Arena configuration--------
 
@@ -15,9 +16,15 @@ glass_arena.set_texture("default_glass.png")
 -----------------------------------
 --------Spawn configuration--------
 
---Set what happens to players on death.
+--Set what happens to players when they join. [SAFE]
+spawning.on_join("spectate")
+
+--Set what happens to players on death. [SAFE]
 --Defaults to nothing.
 spawning.on_death("spectate")
+
+--Set spawn point. [SAFE]
+spawning.set_spawn("static", {0,0,0})
 
 -----------------------------------
 --------Chest configuration--------
