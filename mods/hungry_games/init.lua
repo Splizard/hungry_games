@@ -1,6 +1,27 @@
 local chest_item = random_chests.register_item
 
---Regester a new item that can be spawned in random chests.
+-----------------------------------
+--------Chest configuration--------
+
+--Enable chests to spawn in the world when generated.
+--Pass false if you want to hide your own chests in the world in creative.
+random_chests.enable()
+
+--Set Chest Rarity.
+--Rarity is how many chests per chunk.
+random_chests.set_rarity(3)
+
+--Set Chest Refill.
+--The refill rate should not be set too low to reduce lag
+--Uncomment one of the following...
+
+----Can be set as an abm: 
+--random_chests.setrefill("abm", 1000)
+
+----or as nodetimers: (refill rate is in seconds)
+--random_chests.setrefill("nodetimer", 3600)
+
+--Register a new item that can be spawned in random chests.
 --eg chest_item('default:torch', 4, 6) #has a 1 in 4 chance of spawning up to 6 torches.
 chest_item('default:apple', 4, 5)
 chest_item('default:ladder', 8, 5)
