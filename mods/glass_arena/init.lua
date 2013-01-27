@@ -1,4 +1,4 @@
-local arena_size = 200
+local arena_size = 500
 arena_size = arena_size/2
 
 glass_arena = {}
