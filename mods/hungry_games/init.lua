@@ -7,7 +7,7 @@
 --------Arena configuration--------
 
 --Set size of the arena.
-glass_arena.set_size(200)
+glass_arena.set_size(400)
 
 --Set texture of the arena. [SAFE]
 glass_arena.set_texture("default_glass.png") 
