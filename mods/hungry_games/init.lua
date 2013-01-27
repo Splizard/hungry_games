@@ -1,7 +1,15 @@
-local chest_item = random_chests.register_item
+-----------------------------------
+--------Arena configuration--------
+
+--Set size of the arena.
+glass_arena.set_size(200)
+
+--Set texture of the arena.
+glass_arena.set_texture("default_glass.png")
 
 -----------------------------------
 --------Chest configuration--------
+local chest_item = random_chests.register_item
 
 --Enable chests to spawn in the world when generated.
 --Pass false if you want to hide your own chests in the world in creative.

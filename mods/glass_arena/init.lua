@@ -1,6 +1,27 @@
 local arena_size = 200
-
 arena_size = arena_size/2
+
+glass_arena = {}
+
+--Set size of the arena
+function glass_arena.set_size(n)
+	arena_size = (n/2)
+end
+
+--Set arena texture
+function glass_arena.set_texture(name)
+	minetest.register_node(":glass_arena:wall",{
+		drawtype = "glasslike",
+		tiles = {name},
+		inventory_image = minetest.inventorycube("default_glass.png"),
+		paramtype = "light",
+		sunlight_propagates = true,
+		is_ground_content = true,
+		diggable = false,
+		groups = {not_in_creative_inventory=1},
+	})
+end
+
 
 --Node defs
 minetest.register_node("glass_arena:wall",{
