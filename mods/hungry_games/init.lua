@@ -1,11 +1,16 @@
+--[[
+	This is the config mod for the hungry_games game.
+	You should edit this BEFORE generation of hungry_games worlds.
+	Feilds Marked with [SAFE] are safe to edit if you already have worlds generated.
+]]--
 -----------------------------------
 --------Arena configuration--------
 
 --Set size of the arena.
 glass_arena.set_size(200)
 
---Set texture of the arena.
-glass_arena.set_texture("default_glass.png")
+--Set texture of the arena. [SAFE]
+glass_arena.set_texture("default_glass.png") 
 
 -----------------------------------
 --------Chest configuration--------
@@ -23,13 +28,13 @@ random_chests.set_rarity(3)
 --The refill rate should not be set too low to reduce lag
 --Uncomment one of the following...
 
-----Can be set as an abm: 
+----Can be set as an abm: [SAFE]
 --random_chests.setrefill("abm", 1000)
 
 ----or as nodetimers: (refill rate is in seconds)
 --random_chests.setrefill("nodetimer", 3600)
 
---Register a new item that can be spawned in random chests.
+--Register a new item that can be spawned in random chests. [SAFE]
 --eg chest_item('default:torch', 4, 6) #has a 1 in 4 chance of spawning up to 6 torches.
 chest_item('default:apple', 4, 5)
 chest_item('default:ladder', 8, 5)
