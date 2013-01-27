@@ -3,7 +3,7 @@ spawning = {}
 
 function spawning.on_death(mode)
 	if mode == "spectate" then
-		minetest.register_on_dieplayer(function(player)
+		minetest.register_on_dieplayer(function(player))
 		   	local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
 			privs.fast = true
