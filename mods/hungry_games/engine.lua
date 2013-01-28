@@ -3,7 +3,7 @@ local ingame = false
 
 local end_grace = function()
 	minetest.setting_set("enable_pvp", "true")
-	for _,player in pairs(minetest.get_connected_players()) do
+	for _,player in ipairs(minetest.get_connected_players()) do
 		minetest.chat_send_player(player:get_player_name(), "Grace peroid over!")
 	end
 end
@@ -72,7 +72,7 @@ minetest.register_on_leaveplayer(function(player)
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
 		if votes >= num or (num > 5 and votes > num*0.75) then
-			for _,player in pairs(players) do
+			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
 				if privs.privs or privs.server then
@@ -229,7 +229,7 @@ minetest.register_chatcommand("vote", {
 		votes = votes + 1
 		minetest.chat_send_player(name, "You have voted to begin! votes so far: "..votes.." votes needed: "..num)
 		if votes >= num or (num > 5 and votes > num*0.75) then
-			for _,player in pairs(players) do
+			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
 				if privs.privs or privs.server then
