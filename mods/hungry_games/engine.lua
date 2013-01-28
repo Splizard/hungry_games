@@ -33,6 +33,7 @@ minetest.register_on_dieplayer(function(player)
 				if privs.privs or privs.server then
 					--server admins are not counted.
 				elseif privs.interact and player:get_hp() > 0 then
+					local pos = player:getpos()
 					minetest.chat_send_player(name, "You Won!!")
 					winner = name
 					privs.fast = true
@@ -40,6 +41,9 @@ minetest.register_on_dieplayer(function(player)
 					privs.interact = false
 					minetest.set_player_privs(name, privs)
 					minetest.chat_send_player(name, "You are now spectating")
+					inv = player:get_inventory()
+					minetest.env:add_item(pos, player:get_wielded_item())
+					inv:set_list("main", {})
 				end
 			end
 			minetest.auth_reload()
@@ -119,6 +123,7 @@ minetest.register_on_leaveplayer(function(player)
 					if privs.privs or privs.server then
 						--server admins are not counted.
 					elseif privs.interact and player:get_hp() > 0 then
+						local pos = player:getpos()
 						minetest.chat_send_player(name, "You Won!!")
 						winner = name
 						privs.fast = true
@@ -126,6 +131,9 @@ minetest.register_on_leaveplayer(function(player)
 						privs.interact = false
 						minetest.set_player_privs(name, privs)
 						minetest.chat_send_player(name, "You are now spectating")
+						inv = player:get_inventory()
+						minetest.env:add_item(pos, player:get_wielded_item())
+						inv:set_list("main", {})
 					end
 				end
 				minetest.auth_reload()
