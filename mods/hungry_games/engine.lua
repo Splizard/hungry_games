@@ -42,6 +42,7 @@ minetest.register_on_dieplayer(function(player)
 					minetest.chat_send_player(name, "You are now spectating")
 				end
 			end
+			minetest.auth_reload()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
@@ -127,6 +128,7 @@ minetest.register_on_leaveplayer(function(player)
 						minetest.chat_send_player(name, "You are now spectating")
 					end
 				end
+				minetest.auth_reload()
 				for _,player in ipairs(players) do
 					local name = player:get_player_name()
 				   	local privs = minetest.get_player_privs(name)
