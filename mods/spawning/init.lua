@@ -73,5 +73,9 @@ function spawning.set_spawn(mode, param)
 		minetest.register_on_respawnplayer(spawn)
 		minetest.register_on_joinplayer(spawn)
 		spawning.spawn = spawn
+	elseif mode == "dynamic" then
+		minetest.register_on_respawnplayer(glass_arena.teleport)
+		minetest.register_on_joinplayer(glass_arena.teleport)
+		spawning.spawn = glass_arena.teleport
 	end
 end

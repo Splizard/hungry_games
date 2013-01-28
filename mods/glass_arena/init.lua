@@ -58,9 +58,6 @@ minetest.register_node("glass_arena:wall_end",{
 })
 
 --Teleport player within boundary
-
-local glass_arena = {}
-
 glass_arena.rise = function(player)
 	local pos = player:getpos()
 	if pos then
@@ -87,19 +84,12 @@ glass_arena.rise = function(player)
 	end
 end
 
-local function teleport(player)
+function glass_arena.teleport(player)
 	local pos = player:getpos()
 	player:setpos({x=math.random(-arena_size+1,arena_size-1),y=0,z=math.random(-arena_size+1,arena_size-1)})
 	minetest.after(1, glass_arena.rise, player)
 	return true
 end
-
-minetest.register_on_joinplayer(teleport)
-minetest.register_on_newplayer(function(player)
-	player:get_inventory():add_item('main', 'default:ladder 10')
-end)
-
-minetest.register_on_respawnplayer(teleport)
 
 --Regenerate walls if pieces are missing
 minetest.register_abm({

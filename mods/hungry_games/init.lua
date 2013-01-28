@@ -24,6 +24,8 @@ spawning.on_join("spectate")
 spawning.on_death("spectate")
 
 --Set spawn point. [SAFE]
+--Can be set as static: 		spawning.set_spawn("static", {0,0,0})
+--or dynamic (random spawn): 	spawning.set_spawn("dynamic")
 spawning.set_spawn("static", {0,0,0})
 
 -----------------------------------
