@@ -204,15 +204,19 @@ minetest.register_chatcommand("vote", {
 	description = "Vote to start the Hungry Games",
 	privs = {vote=true},
 	func = function(name, param)
+		local players = minetest.get_connected_players()
+		local num = table.getn(players)
+		if num == 1 then 
+			minetest.chat_send_player(name, "Need more players!")
+			return
+		end
 		local privs = minetest.get_player_privs(name)
 		privs.vote = false
 		minetest.set_player_privs(name, privs)
 		minetest.auth_reload()
 		votes = votes + 1
-		local players = minetest.get_connected_players()
-		local num = table.getn(players)
 		minetest.chat_send_player(name, "You have voted to begin! votes so far: "..votes.." votes needed: "..num)
-		if num == votes then
+		if votes >= num or (num > 5 and votes > num*0.75) then
 			for _,player in pairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
