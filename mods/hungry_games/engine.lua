@@ -32,7 +32,6 @@ minetest.register_on_dieplayer(function(player)
 					privs.fly = true
 					privs.interact = false
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
 					minetest.chat_send_player(name, "You are now spectating")
 				end
 			end
@@ -42,8 +41,8 @@ minetest.register_on_dieplayer(function(player)
 				minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
 				privs.vote = true
 				minetest.set_player_privs(name, privs)
-				minetest.auth_reload()
 			end
+			minetest.auth_reload()
 		end
 	end
 end)
@@ -77,12 +76,12 @@ minetest.register_on_leaveplayer(function(player)
 					privs.interact = true
 					privs.vote = false
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
 					minetest.chat_send_player(name, "The Hunger Games has begun!")
 				end
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
+			minetest.auth_reload()
 			votes = 0
 		end
 		if ingame then
@@ -114,7 +113,6 @@ minetest.register_on_leaveplayer(function(player)
 						privs.fly = true
 						privs.interact = false
 						minetest.set_player_privs(name, privs)
-						minetest.auth_reload()
 						minetest.chat_send_player(name, "You are now spectating")
 					end
 				end
@@ -124,8 +122,8 @@ minetest.register_on_leaveplayer(function(player)
 					minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
 					privs.vote = true
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
 				end
+				minetest.auth_reload()
 			end
 		end
 	end)
@@ -168,12 +166,12 @@ minetest.register_chatcommand("hg", {
 					privs.interact = true
 					privs.vote = false
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
 					minetest.chat_send_player(name, "The Hunger Games has begun!")
 				end
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
+			minetest.auth_reload()
 			ingame = true
 			votes = 0
 		--Stops Game.
@@ -189,10 +187,9 @@ minetest.register_chatcommand("hg", {
 					privs.interact = false
 					privs.vote = true
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
-					minetest.chat_send_player(name, "The Hunger Games has been stopped!")
-					
+					minetest.chat_send_player(name, "The Hunger Games has been stopped!")		
 				end
+				minetest.auth_reload()
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
@@ -228,12 +225,12 @@ minetest.register_chatcommand("vote", {
 					privs.interact = true
 					privs.vote = false
 					minetest.set_player_privs(name, privs)
-					minetest.auth_reload()
 					minetest.chat_send_player(name, "The Hunger Games has begun!")
 				end
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
+			minetest.auth_reload()
 			votes = 0
 			ingame = true
 		end
