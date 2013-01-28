@@ -16,6 +16,18 @@ end
 
 --Spawn items in chest
 local fill_chest = function(pos)
+	--Notify players if a chest was at pos is empty and has been refilled.
+	local oldnode = minetest.env:get_node(pos)
+	if oldnode.name == "default:chest" then
+		local oldinv = get_meta(pos):get_inventory()
+		if oldinv:is_empty() then
+			for _,player in ipairs(minetest.get_connected_players()) do
+				local name = player:get_player_name()
+				minetest.chat_send_player(name, "A chest has been refilled!")
+			end
+		end
+	end
+	--Spawn chest and add random items.
 	local invcontent = {}
 	for i,v in pairs(random_items) do
 		if math.random(1, v[2]) == 1 then
