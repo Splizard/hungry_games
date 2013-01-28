@@ -46,7 +46,7 @@ function spawning.set_spawn(mode, param)
 		local function spawn(player)
 		   	local pos = spawning.point
 			if pos then
-				if minetest.env:get_node({x=pos.x,y=pos.y+1,z=pos.z}) ~= "air" then
+				if minetest.env:get_node({x=pos.x,y=pos.y+1,z=pos.z}).name ~= "air" then
 					for y=0, 100 do
 						local node = minetest.env:get_node({x=pos.x,y=y,z=pos.z})
 						if node.name == "ignore" then
