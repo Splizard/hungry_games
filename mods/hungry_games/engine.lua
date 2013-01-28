@@ -133,7 +133,9 @@ minetest.register_on_leaveplayer(function(player)
 						minetest.chat_send_player(name, "You are now spectating")
 						inv = player:get_inventory()
 						minetest.env:add_item(pos, player:get_wielded_item())
-						inv:set_list("main", {})
+						if inv then
+							inv:set_list("main", {})
+						end
 					end
 				end
 				minetest.auth_reload()
