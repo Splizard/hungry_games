@@ -8,8 +8,7 @@ local end_grace = function()
 	end
 end
 
---Check if theres only one player left and stop hungry games.
-minetest.register_on_dieplayer(function(player)
+local check_win = function()
 	if ingame then
 		local players = minetest.get_connected_players() 
 		local winner = ""
@@ -55,8 +54,51 @@ minetest.register_on_dieplayer(function(player)
 				minetest.set_player_privs(name, privs)
 			end
 			minetest.auth_reload()
+			ingame = false
 		end
 	end
+end
+
+local start_game = function()
+	for _,player in  pairs(minetest.get_connected_players() ) do
+		minetest.after(0.1, function(player)
+			local name = player:get_player_name()
+		   	local privs = minetest.get_player_privs(name)
+			if privs.privs or privs.server then
+				minetest.chat_send_player(name, "The Hunger Games has begun!")
+				minetest.chat_send_player(name, "You have 1min until grace period ends!")
+			else
+				privs.fast = false
+				privs.fly = false
+				privs.interact = true
+				privs.vote = false
+				minetest.set_player_privs(name, privs)
+				minetest.chat_send_player(name, "The Hunger Games has begun!")
+				minetest.chat_send_player(name, "You have 1min until grace period ends!")
+				minetest.auth_reload()
+			end
+			player:set_hp(20)
+			spawning.spawn(player)
+		end, player)
+	end
+	minetest.setting_set("enable_pvp", "false")
+	minetest.after(60, end_grace)
+	minetest.auth_reload()
+	votes = 0
+	ingame = true
+end
+
+local check_votes = function()
+	local players = minetest.get_connected_players()
+	local num = table.getn(players)
+	if votes >= num or (num > 5 and votes > num*0.75) then
+		start_game()
+	end
+end
+
+--Check if theres only one player left and stop hungry games.
+minetest.register_on_dieplayer(function(player)
+	check_win()
 end)
 
 minetest.register_on_joinplayer(function(player)
@@ -74,81 +116,8 @@ minetest.register_on_leaveplayer(function(player)
 		votes = votes - 1
 	end
 	minetest.after(1, function()
-		local players = minetest.get_connected_players()
-		local num = table.getn(players)
-		if votes >= num or (num > 5 and votes > num*0.75) then
-			for _,player in ipairs(players) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				else
-					privs.fast = false
-					privs.fly = false
-					privs.interact = true
-					privs.vote = false
-					minetest.set_player_privs(name, privs)
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				end
-				player:set_hp(20)
-				spawning.spawn(player)
-			end
-			minetest.setting_set("enable_pvp", "false")
-			minetest.after(60, end_grace)
-			minetest.auth_reload()
-			votes = 0
-		end
-		if ingame then
-			local players = minetest.get_connected_players() 
-			local winner = ""
-			local counter = table.getn(players)
-			for _,player in ipairs(players) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-					--server admins are not counted.
-					counter = counter - 1
-				elseif not privs.interact then
-					counter = counter - 1
-				elseif player:get_hp() < 1 then
-					counter = counter - 1
-				end
-			end
-			if counter <= 1 then
-				for _,player in ipairs(players) do
-					local name = player:get_player_name()
-				   	local privs = minetest.get_player_privs(name)
-					if privs.privs or privs.server then
-						--server admins are not counted.
-					elseif privs.interact and player:get_hp() > 0 then
-						local pos = player:getpos()
-						minetest.chat_send_player(name, "You Won!!")
-						winner = name
-						privs.fast = true
-						privs.fly = true
-						privs.interact = false
-						minetest.set_player_privs(name, privs)
-						minetest.chat_send_player(name, "You are now spectating")
-						inv = player:get_inventory()
-						minetest.env:add_item(pos, player:get_wielded_item())
-						if inv then
-							inv:set_list("main", {})
-						end
-					end
-				end
-				minetest.auth_reload()
-				for _,player in ipairs(players) do
-					local name = player:get_player_name()
-				   	local privs = minetest.get_player_privs(name)
-					minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
-					privs.vote = true
-					minetest.set_player_privs(name, privs)
-				end
-				minetest.auth_reload()
-			end
-		end
+		check_votes()
+		check_win()
 	end)
 end)
 
@@ -178,29 +147,7 @@ minetest.register_chatcommand("hg", {
 		until false
 		--Restarts/Starts game.
 		if parms[1] == "restart" or parms[1] == 'r' or parms[1] == "start" then
-			for _,player in ipairs(minetest.get_connected_players()) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				else
-					privs.fast = false
-					privs.fly = false
-					privs.interact = true
-					privs.vote = false
-					minetest.set_player_privs(name, privs)
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				end
-				player:set_hp(20)
-				spawning.spawn(player)
-			end
-			minetest.setting_set("enable_pvp", "false")
-			minetest.after(60, end_grace)
-			minetest.auth_reload()
-			ingame = true
-			votes = 0
+			start_game()
 		--Stops Game.
 		elseif parms[1] == "stop" then
 			for _,player in ipairs(minetest.get_connected_players()) do
@@ -240,30 +187,6 @@ minetest.register_chatcommand("vote", {
 		minetest.auth_reload()
 		votes = votes + 1
 		minetest.chat_send_player(name, "You have voted to begin! votes so far: "..votes.." votes needed: "..num)
-		if votes >= num or (num > 5 and votes > num*0.75) then
-			for _,player in ipairs(players) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				else
-					privs.fast = false
-					privs.fly = false
-					privs.interact = true
-					privs.vote = false
-					minetest.set_player_privs(name, privs)
-					minetest.chat_send_player(name, "The Hunger Games has begun!")
-					minetest.chat_send_player(name, "You have 1min until grace period ends!")
-				end
-				player:set_hp(20)
-				spawning.spawn(player)
-			end
-			minetest.setting_set("enable_pvp", "false")
-			minetest.after(60, end_grace)
-			minetest.auth_reload()
-			votes = 0
-			ingame = true
-		end
+		check_votes()
 	end,
 })
