@@ -14,10 +14,7 @@ local check_win = function()
 		for _,player in ipairs(players) do
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
-			if privs.privs or privs.server then
-				--server admins are not counted.
-				counter = counter - 1
-			elseif not privs.interact then
+			if not privs.interact then
 				counter = counter - 1
 			elseif player:get_hp() < 1 then
 				counter = counter - 1
@@ -28,7 +25,16 @@ local check_win = function()
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
 				if privs.privs or privs.server then
-					--server admins are not counted.
+					local pos = player:getpos()
+					minetest.chat_send_player(name, "You Won!!")
+					winner = name
+					privs.fast = true
+					privs.fly = true
+					privs.interact = true
+					minetest.set_player_privs(name, privs)
+					minetest.chat_send_player(name, "You are now spectating")
+					inv = player:get_inventory()
+					minetest.env:add_item(pos, player:get_wielded_item())
 				elseif privs.interact and player:get_hp() > 0 then
 					local pos = player:getpos()
 					minetest.chat_send_player(name, "You Won!!")
@@ -65,7 +71,9 @@ local start_game = function()
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
 			if privs.privs or privs.server then
-
+				privs.fast = false
+				privs.fly = false
+				privs.give = false
 			else
 				privs.fast = false
 				privs.fly = false
