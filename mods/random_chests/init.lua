@@ -20,7 +20,7 @@ local fill_chest = function(pos)
 	local oldnode = minetest.env:get_node(pos)
 	if oldnode.name == "default:chest" then
 		local oldinv = minetest.env:get_meta(pos):get_inventory()
-		if oldinv:is_empty() then
+		if oldinv:is_empty("main") then
 			minetest.chat_send_all("A chest has been refilled!")
 		end
 	end
