@@ -3,9 +3,7 @@ local ingame = false
 
 local end_grace = function()
 	minetest.setting_set("enable_pvp", "true")
-	for _,player in ipairs(minetest.get_connected_players()) do
-		minetest.chat_send_player(player:get_player_name(), "Grace peroid over!")
-	end
+	minetest.chat_send_all("Grace peroid over!")
 end
 
 local check_win = function()
@@ -49,10 +47,10 @@ local check_win = function()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
-				minetest.chat_send_player(name, "The Hungry Games is now over! "..winner.." was the winner!")
 				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
+			minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
 			minetest.auth_reload()
 			ingame = false
 		end
@@ -65,22 +63,21 @@ local start_game = function()
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
 			if privs.privs or privs.server then
-				minetest.chat_send_player(name, "The Hunger Games has begun!")
-				minetest.chat_send_player(name, "You have 1min until grace period ends!")
+
 			else
 				privs.fast = false
 				privs.fly = false
 				privs.interact = true
 				privs.vote = false
 				minetest.set_player_privs(name, privs)
-				minetest.chat_send_player(name, "The Hunger Games has begun!")
-				minetest.chat_send_player(name, "You have 1min until grace period ends!")
 				minetest.auth_reload()
 			end
 			player:set_hp(20)
 			spawning.spawn(player)
 		end, player)
 	end
+	minetest.chat_send_all("The Hunger Games has begun!")
+	minetest.chat_send_all("You have 1min until grace period ends!")
 	minetest.setting_set("enable_pvp", "false")
 	minetest.after(60, end_grace)
 	minetest.auth_reload()
@@ -154,19 +151,18 @@ minetest.register_chatcommand("hg", {
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
 				if privs.privs or privs.server then
-					minetest.chat_send_player(name, "The Hunger Games has been stopped!")
 				else
 					privs.fast = true
 					privs.fly = true
 					privs.interact = false
 					privs.vote = true
-					minetest.set_player_privs(name, privs)
-					minetest.chat_send_player(name, "The Hunger Games has been stopped!")		
+					minetest.set_player_privs(name, privs)	
 				end
 				minetest.auth_reload()
 				player:set_hp(20)
 				spawning.spawn(player)
 			end
+			minetest.chat_send_all("The Hunger Games has been stopped!")
 		end
 	end,
 })
@@ -186,7 +182,7 @@ minetest.register_chatcommand("vote", {
 		minetest.set_player_privs(name, privs)
 		minetest.auth_reload()
 		votes = votes + 1
-		minetest.chat_send_player(name, "You have voted to begin! votes so far: "..votes.." votes needed: "..num)
+		minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
 		check_votes()
 	end,
 })
