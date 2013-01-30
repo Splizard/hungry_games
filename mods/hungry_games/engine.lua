@@ -103,7 +103,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if votes >= num or (num > 5 and votes > num*0.75) then
+		if num > 1 and (votes >= num or (num > 5 and votes > num*0.75)) then
 			start_game()
 		end
 	end
