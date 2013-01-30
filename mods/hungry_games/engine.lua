@@ -51,7 +51,7 @@ local check_win = function()
 			end
 			minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
 			minetest.auth_reload()
-			ingame = false
+			stop_game()
 		end
 	end
 end
@@ -78,6 +78,22 @@ local start_game = function()
 	minetest.auth_reload()
 	votes = 0
 	ingame = true
+end
+
+local stop_game = function()
+	for _,player in ipairs(minetest.get_connected_players()) do
+		local name = player:get_player_name()
+	   	local privs = minetest.get_player_privs(name)
+		privs.fast = true
+		privs.fly = true
+		privs.interact = false
+		privs.vote = true
+		minetest.set_player_privs(name, privs)	
+		minetest.auth_reload()
+		player:set_hp(20)
+		spawning.spawn(player, "lobby")
+	end
+	ingame = false
 end
 
 local check_votes = function()
@@ -145,18 +161,7 @@ minetest.register_chatcommand("hg", {
 			start_game()
 		--Stops Game.
 		elseif parms[1] == "stop" then
-			for _,player in ipairs(minetest.get_connected_players()) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				privs.fast = true
-				privs.fly = true
-				privs.interact = false
-				privs.vote = true
-				minetest.set_player_privs(name, privs)	
-				minetest.auth_reload()
-				player:set_hp(20)
-				spawning.spawn(player, "lobby")
-			end
+			stop_game()
 			minetest.chat_send_all("The Hunger Games has been stopped!")
 		elseif parms[1] == "set" then
 			if parms[2] == "spawn" or parms[2] == "lobby" then
