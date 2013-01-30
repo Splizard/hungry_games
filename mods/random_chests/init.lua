@@ -110,10 +110,15 @@ end
 
 function random_chests.refill(i)
 	filling = true
+	local env = minetest.env
 	if i == nil then i = 1 end
 	local s = i
 	while i <= table.getn(chests) do
-		fill_chest(chests[i])
+		if env:get_node(chests[i]).name ~= "default:chest" then
+			table.remove(chests,i)
+		else
+			fill_chest(chests[i])
+		end
 		if i > (s+(chests_interval/2)) then
 			minetest.after(0.5,random_chests.refill, i)
 			return
@@ -121,6 +126,7 @@ function random_chests.refill(i)
 		i = i + 1
 	end
 	filling = false
+	random_chests.save()
 	print("finished filling chests")
 end
 
