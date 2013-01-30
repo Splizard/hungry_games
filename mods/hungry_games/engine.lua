@@ -65,7 +65,11 @@ local check_win = function()
 				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
-			minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
+			if winner ~= "" then
+				minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
+			else
+				minetest.chat_send_all("The Hungry Games is now over!  No survivors!")	
+			end
 			minetest.auth_reload()
 			stop_game()
 		end
