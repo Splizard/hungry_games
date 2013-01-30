@@ -68,7 +68,7 @@ local start_game = function()
 			minetest.set_player_privs(name, privs)
 			minetest.auth_reload()
 			player:set_hp(20)
-			spawning.spawn(player)
+			spawning.spawn(player, "spawn")
 		end, player)
 	end
 	minetest.chat_send_all("The Hunger Games has begun!")
@@ -101,6 +101,7 @@ minetest.register_on_joinplayer(function(player)
 	privs.vote = true
 	minetest.set_player_privs(name, privs)
 	minetest.auth_reload()
+	spawning.spawn(player, "lobby")
 end)
 
 minetest.register_on_leaveplayer(function(player)
@@ -154,9 +155,23 @@ minetest.register_chatcommand("hg", {
 				minetest.set_player_privs(name, privs)	
 				minetest.auth_reload()
 				player:set_hp(20)
-				spawning.spawn(player)
+				spawning.spawn(player, "lobby")
 			end
 			minetest.chat_send_all("The Hunger Games has been stopped!")
+		elseif parms[1] == "set" then
+			if parms[2] == "spawn" or parms[2] == "lobby" then
+				local pos = {}
+				if parms[3] and parms[4] and parms[5] then
+					pos = {x=parms[3],y=parms[4],z=parms[5]}
+					spawning.set_spawn(parms[2], pos)
+				else
+					pos = minetest.env:get_player_by_name(name):getpos()
+					spawning.set_spawn(parms[2], pos)
+				end
+				minetest.chat_send_player(name, parms[2].." has been set to "..pos.x.." "..pos.y.." "..pos.z)
+			else
+				minetest.chat_send_player(name, "Set what?")
+			end
 		end
 	end,
 })

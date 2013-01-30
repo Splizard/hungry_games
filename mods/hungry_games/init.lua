@@ -23,11 +23,16 @@ spawning.on_join("spectate")
 --Defaults to nothing.
 spawning.on_death("spectate")
 
---Set spawn point. [SAFE]
---Can be set as static: 		spawning.set_spawn("static", {0,0,0})
---or dynamic (random spawn): 	spawning.set_spawn("dynamic")
-spawning.set_spawn("static", {0,0,0})
-
+--Set spawn points. [SAFE]
+--NOTE: is overiden by hg_admin commands and save file.
+spawning.register_spawn("spawn",{
+	mode = "static", 
+	pos = {x=0,y=0,z=0},
+})
+spawning.register_spawn("lobby",{
+	mode = "static", 
+	pos = {x=0,y=0,z=0},
+})
 -----------------------------------
 --------Chest configuration--------
 local chest_item = random_chests.register_item
