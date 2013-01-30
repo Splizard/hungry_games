@@ -2,8 +2,10 @@ local votes = 0
 local ingame = false
 
 local end_grace = function()
-	minetest.setting_set("enable_pvp", "true")
-	minetest.chat_send_all("Grace peroid over!")
+	if ingame then
+		minetest.setting_set("enable_pvp", "true")
+		minetest.chat_send_all("Grace peroid over!")
+	end
 end
 
 local check_win = function()
@@ -14,10 +16,7 @@ local check_win = function()
 		for _,player in ipairs(players) do
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
-			if privs.privs or privs.server then
-				--server admins are not counted.
-				counter = counter - 1
-			elseif not privs.interact then
+			if not privs.interact then
 				counter = counter - 1
 			elseif player:get_hp() < 1 then
 				counter = counter - 1
@@ -27,9 +26,7 @@ local check_win = function()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-					--server admins are not counted.
-				elseif privs.interact and player:get_hp() > 0 then
+				if privs.interact and player:get_hp() > 0 then
 					local pos = player:getpos()
 					minetest.chat_send_player(name, "You Won!!")
 					winner = name
@@ -64,16 +61,12 @@ local start_game = function()
 		minetest.after(0.1, function(player)
 			local name = player:get_player_name()
 		   	local privs = minetest.get_player_privs(name)
-			if privs.privs or privs.server then
-
-			else
-				privs.fast = false
-				privs.fly = false
-				privs.interact = true
-				privs.vote = false
-				minetest.set_player_privs(name, privs)
-				minetest.auth_reload()
-			end
+			privs.fast = false
+			privs.fly = false
+			privs.interact = true
+			privs.vote = false
+			minetest.set_player_privs(name, privs)
+			minetest.auth_reload()
 			player:set_hp(20)
 			spawning.spawn(player)
 		end, player)
@@ -88,10 +81,12 @@ local start_game = function()
 end
 
 local check_votes = function()
-	local players = minetest.get_connected_players()
-	local num = table.getn(players)
-	if votes >= num or (num > 5 and votes > num*0.75) then
-		start_game()
+	if not ingame then
+		local players = minetest.get_connected_players()
+		local num = table.getn(players)
+		if votes >= num or (num > 5 and votes > num*0.75) then
+			start_game()
+		end
 	end
 end
 
@@ -152,14 +147,11 @@ minetest.register_chatcommand("hg", {
 			for _,player in ipairs(minetest.get_connected_players()) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
-				if privs.privs or privs.server then
-				else
-					privs.fast = true
-					privs.fly = true
-					privs.interact = false
-					privs.vote = true
-					minetest.set_player_privs(name, privs)	
-				end
+				privs.fast = true
+				privs.fly = true
+				privs.interact = false
+				privs.vote = true
+				minetest.set_player_privs(name, privs)	
 				minetest.auth_reload()
 				player:set_hp(20)
 				spawning.spawn(player)
@@ -179,12 +171,17 @@ minetest.register_chatcommand("vote", {
 			minetest.chat_send_player(name, "Need more players!")
 			return
 		end
-		local privs = minetest.get_player_privs(name)
-		privs.vote = false
-		minetest.set_player_privs(name, privs)
-		minetest.auth_reload()
-		votes = votes + 1
-		minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
-		check_votes()
+		if not ingame then
+			local privs = minetest.get_player_privs(name)
+			privs.vote = false
+			minetest.set_player_privs(name, privs)
+			minetest.auth_reload()
+			votes = votes + 1
+			minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
+			check_votes()
+		else
+			minetest.chat_send_player(name, "Already ingame!")
+			return
+		end
 	end,
 })
