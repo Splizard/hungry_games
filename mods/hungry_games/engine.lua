@@ -8,6 +8,22 @@ local end_grace = function()
 	end
 end
 
+local stop_game = function()
+	for _,player in ipairs(minetest.get_connected_players()) do
+		local name = player:get_player_name()
+	   	local privs = minetest.get_player_privs(name)
+		privs.fast = true
+		privs.fly = true
+		privs.interact = false
+		privs.vote = true
+		minetest.set_player_privs(name, privs)	
+		minetest.auth_reload()
+		player:set_hp(20)
+		spawning.spawn(player, "lobby")
+	end
+	ingame = false
+end
+
 local check_win = function()
 	if ingame then
 		local players = minetest.get_connected_players() 
@@ -78,22 +94,6 @@ local start_game = function()
 	minetest.auth_reload()
 	votes = 0
 	ingame = true
-end
-
-local stop_game = function()
-	for _,player in ipairs(minetest.get_connected_players()) do
-		local name = player:get_player_name()
-	   	local privs = minetest.get_player_privs(name)
-		privs.fast = true
-		privs.fly = true
-		privs.interact = false
-		privs.vote = true
-		minetest.set_player_privs(name, privs)	
-		minetest.auth_reload()
-		player:set_hp(20)
-		spawning.spawn(player, "lobby")
-	end
-	ingame = false
 end
 
 local check_votes = function()
