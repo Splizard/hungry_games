@@ -4,3 +4,4 @@ glass_arena
 dead_drop
 food
 throwing
+hunger

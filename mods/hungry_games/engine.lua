@@ -87,6 +87,7 @@ local start_game = function()
 			minetest.auth_reload()
 			player:set_hp(20)
 			spawning.spawn(player, "spawn")
+			hunger.reset(name)
 		end, player)
 	end
 	minetest.chat_send_all("The Hunger Games has begun!")
