@@ -54,8 +54,12 @@ random_chests.set_rarity(3)
 --The refill rate should not be set too low to reduce lag
 --Uncomment one of the following...
 
-----Can be set as an abm: [SAFE]
-random_chests.setrefill("abm", 12000)
+----Can be set as a database:
+----This will refill chests when a match is started, it processes 5 chests per second (so will take a while to fill on a large map)
+random_chests.setrefill("database", 5)
+
+----or set as an abm: [SAFE]
+--random_chests.setrefill("abm", 12000)
 
 ----or as nodetimers: (refill rate is in seconds)
 --random_chests.setrefill("nodetimer", 3600)

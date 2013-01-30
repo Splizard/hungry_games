@@ -73,6 +73,8 @@ local check_win = function()
 end
 
 local start_game = function()
+	print("filling chests...")
+	random_chests.refill()
 	for _,player in  pairs(minetest.get_connected_players() ) do
 		minetest.after(0.1, function(player)
 			local name = player:get_player_name()

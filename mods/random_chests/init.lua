@@ -6,6 +6,10 @@ local chests_nodetimer = false
 local chests_interval = nil
 local chests_boundary = false
 
+local chests = {}
+local filling = false
+local filepath = minetest.get_worldpath()..'/random_chests'
+
 -- Collision detection function.
 -- Checks if a and b overlap.
 -- w and h mean width and height.
@@ -16,12 +20,14 @@ end
 
 --Spawn items in chest
 local fill_chest = function(pos)
-	--Notify players if a chest was at pos is empty and has been refilled.
-	local oldnode = minetest.env:get_node(pos)
-	if oldnode.name == "default:chest" then
-		local oldinv = minetest.env:get_meta(pos):get_inventory()
-		if oldinv:is_empty("main") then
-			minetest.chat_send_all("A chest has been refilled!")
+	if filling == false then
+		--Notify players if a chest was at pos is empty and has been refilled.
+		local oldnode = minetest.env:get_node(pos)
+		if oldnode.name == "default:chest" then
+			local oldinv = minetest.env:get_meta(pos):get_inventory()
+			if oldinv:is_empty("main") then
+				minetest.chat_send_all("A chest has been refilled!")
+			end
 		end
 	end
 	--Spawn chest and add random items.
@@ -72,9 +78,65 @@ function random_chests.set_boundary(n)
 	chests_boundary = tonumber(n)/2
 end
 
+--------------------------------------------
+--Only works if refill is set to database
+
+--Load chests
+local input = io.open(filepath..".chests", "r")
+if input then
+    while true do
+        local nodename = input:read("*l")
+        if not nodename then break end
+        local parms = {}
+        --Catch config.
+		flags = nodename
+		repeat
+			v, p = flags:match("^(%S*) (.*)")
+			if p then
+				flags = p
+			end
+			if v then
+				table.insert(parms,v)
+			else
+				v = flags:match("^(%S*)")
+				table.insert(parms,v)
+				break
+			end
+		until false
+		table.insert(chests,{x=parms[1],y=parms[2],z=parms[3]})
+	end
+	io.close(input)
+end
+
+function random_chests.refill(i)
+	filling = true
+	if i == nil then i = 1 end
+	local s = i
+	while i <= table.getn(chests) do
+		fill_chest(chests[i])
+		if i > (s+(chests_interval/2)) then
+			minetest.after(0.5,random_chests.refill, i)
+			return
+		end
+		i = i + 1
+	end
+	filling = false
+	print("finished filling chests")
+end
+
+function random_chests.save()
+	local output = io.open(filepath..".chests", "w")
+	for i,v in pairs(chests) do
+		output:write(v.x.." "..v.y.." "..v.z.."\n")
+	end
+	io.close(output)
+end
+
+--------------------------------------------
+
 --Refill chests
 function random_chests.setrefill(mode, interval)
-	if interval < 100 then
+	if mode ~= "database" and interval < 100 then
 		print("random_chests: WARNING! You have made the chest refill rate very high!")
 	end
 	if mode == "abm" then
@@ -95,6 +157,28 @@ function random_chests.setrefill(mode, interval)
 		chest.on_construct = function(pos)
 			local timer = minetest.env:get_node_timer(pos)
 			timer:start(interval)
+			local meta = minetest.env:get_meta(pos)
+			meta:set_string("formspec",
+					"size[8,9]"..
+					"list[current_name;main;0,0;8,4;]"..
+					"list[current_player;main;0,5;8,4;]")
+			meta:set_string("infotext", "Chest")
+			local inv = meta:get_inventory()
+			inv:set_size("main", 8*4)
+		end
+		minetest.register_node(":default:chest", chest)
+	elseif mode == "database" then
+		chests_interval = interval
+		local chest = {}
+		for k,v in pairs(minetest.registered_nodes["default:chest"]) do
+			chest[k] = v
+		end
+		chest.on_construct = function(pos)
+			if not filling then
+				table.insert(chests,pos)
+				random_chests.save()
+			end
+			
 			local meta = minetest.env:get_meta(pos)
 			meta:set_string("formspec",
 					"size[8,9]"..
