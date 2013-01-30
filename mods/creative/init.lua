@@ -144,7 +144,7 @@ if minetest.setting_getbool("creative_mode") then
 		return true
 	end)
 	
-	function minetest.handle_node_drops(pos, drops, digger)
+	--[[function minetest.handle_node_drops(pos, drops, digger)
 		if not digger or not digger:is_player() then
 			return
 		end
@@ -157,6 +157,6 @@ if minetest.setting_getbool("creative_mode") then
 				end
 			end
 		end
-	end
+	end]]--
 	
 end
