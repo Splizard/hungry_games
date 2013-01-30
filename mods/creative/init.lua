@@ -7,21 +7,13 @@ creative_inventory.creative_inventory_size = 0
 minetest.after(0, function()
 	local inv = minetest.create_detached_inventory("creative", {
 		allow_move = function(inv, from_list, from_index, to_list, to_index, count, player)
-			if minetest.setting_getbool("creative_mode") then
-				return count
-			else
-				return 0
-			end
+			return count
 		end,
 		allow_put = function(inv, listname, index, stack, player)
 			return 0
 		end,
 		allow_take = function(inv, listname, index, stack, player)
-			if minetest.setting_getbool("creative_mode") then
-				return -1
-			else
-				return 0
-			end
+			return -1
 		end,
 		on_move = function(inv, from_list, from_index, to_list, to_index, count, player)
 		end,
@@ -55,11 +47,7 @@ local trash = minetest.create_detached_inventory("creative_trash", {
 	-- Allow the stack to be placed and remove it in on_put()
 	-- This allows the creative inventory to restore the stack
 	allow_put = function(inv, listname, index, stack, player)
-		if minetest.setting_getbool("creative_mode") then
-			return stack:get_count()
-		else
-			return 0
-		end
+		return stack:get_count()
 	end,
 	on_put = function(inv, listname, index, stack, player)
 		inv:set_stack(listname, index, "")
@@ -85,13 +73,13 @@ creative_inventory.set_creative_formspec = function(player, start_i, pagenum)
 end
 minetest.register_on_joinplayer(function(player)
 	-- If in creative mode, modify player's inventory forms
-	if not minetest.setting_getbool("creative_mode") then
+	if not minetest.get_player_privs(player:get_player_name()).hg_maker then
 		return
 	end
 	creative_inventory.set_creative_formspec(player, 0, 1)
 end)
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if not minetest.setting_getbool("creative_mode") then
+	if not minetest.get_player_privs(player:get_player_name()).hg_maker then
 		return
 	end
 	-- Figure out current page from formspec
@@ -121,6 +109,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	creative_inventory.set_creative_formspec(player, start_i, start_i / (6*4) + 1)
 end)
 
+minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
+	if minetest.get_player_privs(placer:get_player_name()).hg_maker then
+		return true
+	end
+end)
+
 if minetest.setting_getbool("creative_mode") then
 	
 	minetest.register_item(":", {
@@ -139,10 +133,6 @@ if minetest.setting_getbool("creative_mode") then
 			}
 		}
 	})
-	
-	minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
-		return true
-	end)
 	
 	function minetest.handle_node_drops(pos, drops, digger)
 		if not digger or not digger:is_player() then

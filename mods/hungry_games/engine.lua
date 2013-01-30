@@ -139,7 +139,8 @@ minetest.register_on_leaveplayer(function(player)
 	end)
 end)
 
-minetest.register_privilege("hg_admin", "Hungry Games Admin..")
+minetest.register_privilege("hg_admin", "Hungry Games Admin.")
+minetest.register_privilege("hg_maker", "Hungry Games Map Maker.")
 minetest.register_privilege("vote", "Privilege to vote.")
 
 --Hungry Games Chat Commands.
@@ -208,6 +209,23 @@ minetest.register_chatcommand("vote", {
 			check_votes()
 		else
 			minetest.chat_send_player(name, "Already ingame!")
+			return
+		end
+	end,
+})
+
+minetest.register_chatcommand("build", {
+	description = "Give yourself interact",
+	privs = {hg_maker=true},
+	func = function(name, param)
+		if not ingame then
+				local privs = minetest.get_player_privs(name)
+				privs.interact = true
+				minetest.set_player_privs(name, privs)
+				minetest.auth_reload()
+				minetest.chat_send_player(name, "You now have interact!")
+		else
+			minetest.chat_send_player(name, "You cant build while in a match!")
 			return
 		end
 	end,

@@ -127,7 +127,8 @@ minetest.register_globalstep(function(dtime)
 	end
 	for _,player in ipairs(minetest.get_connected_players()) do
 			local name = player:get_player_name()
-			if minetest.get_player_privs(name).interact then
+			local privs = minetest.get_player_privs(name)
+			if privs.interact and not (privs.hg_maker and privs.fly) then
 				if players_hungry[name] == nil then
 					players_hungry[name] = {count=0}
 				end
