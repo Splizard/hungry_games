@@ -8,7 +8,7 @@ dofile(minetest.get_modpath("hungry_games").."/engine.lua")
 --------Arena configuration--------
 
 --Set size of the arena.
-glass_arena.set_size(200)
+glass_arena.set_size(1000)
 
 --Set texture of the arena. [SAFE]
 glass_arena.set_texture("default_glass.png") 
@@ -44,7 +44,7 @@ random_chests.enable()
 --Set the boundary where chests are spawned
 --Should be set to the same or smaller then the arena.
 --Defaults to whole map.
-random_chests.set_boundary(200)
+random_chests.set_boundary(1000)
 
 --Set Chest Rarity.
 --Rarity is how many chests per chunk.
@@ -59,10 +59,10 @@ random_chests.set_rarity(3)
 random_chests.setrefill("database", 5)
 
 ----or set as an abm: [SAFE]
---random_chests.setrefill("abm", 12000)
+random_chests.setrefill("abm", 1000)
 
 ----or as nodetimers: (refill rate is in seconds)
---random_chests.setrefill("nodetimer", 3600)
+random_chests.setrefill("nodetimer", 100)
 
 --Register a new item that can be spawned in random chests. [SAFE]
 --eg chest_item('default:torch', 4, 6) #has a 1 in 4 chance of spawning up to 6 torches.
