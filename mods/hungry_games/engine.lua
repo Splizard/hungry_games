@@ -18,8 +18,8 @@ local stop_game = function()
 		privs.fly = true
 		privs.interact = nil
 		privs.vote = true
-		minetest.set_player_privs(name, privs)	
-		
+		minetest.set_player_privs(name, privs)
+
 		player:set_hp(20)
 		spawning.spawn(player, "lobby")
 	end
@@ -29,7 +29,7 @@ end
 
 local check_win = function()
 	if ingame then
-		local players = minetest.get_connected_players() 
+		local players = minetest.get_connected_players()
 		local winner = ""
 		local counter = table.getn(players)
 		for _,player in ipairs(players) do
@@ -49,8 +49,8 @@ local check_win = function()
 					local pos = player:getpos()
 					minetest.chat_send_player(name, "You Won!!")
 					winner = name
-					privs.fast = true
-					privs.fly = true
+					privs.fast = nil
+					privs.fly = nil
 					privs.interact = nil
 					minetest.set_player_privs(name, privs)
 					minetest.chat_send_player(name, "You are now spectating")
@@ -61,7 +61,7 @@ local check_win = function()
 					end
 				end
 			end
-			
+
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
@@ -71,9 +71,9 @@ local check_win = function()
 			if winner ~= "" then
 				minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
 			else
-				minetest.chat_send_all("The Hungry Games is now over!  No survivors!")	
+				minetest.chat_send_all("The Hungry Games is now over!  No survivors!")
 			end
-			
+
 			stop_game()
 		end
 	end
@@ -83,7 +83,7 @@ local get_spots = function()
 	i = 1
 	while true do
 		if spawning.is_spawn("player_"..i) then
-			i = i + 1		
+			i = i + 1
 		else
 			return i - 1
 		end
@@ -113,13 +113,13 @@ local start_game = function()
 				privs.interact = true
 				privs.vote = nil
 				minetest.set_player_privs(name, privs)
-				
+
 				player:set_hp(20)
 				spawning.spawn(player, "player_"..i)
 				hunger.reset(name)
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
-				if privs.hg_admin then 
+				if privs.hg_admin then
 					minetest.chat_send_player(name, "Try setting some with the /hg set player_*")
 				end
 			end
@@ -151,9 +151,8 @@ minetest.register_on_dieplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	privs.fast = true
 	privs.fly = true
-	privs.interact = false
+	privs.interact = nil
 	minetest.set_player_privs(name, privs)
-	minetest.auth_reload()
 	minetest.chat_send_player(name, "You are now spectating")
 end)
 
@@ -162,9 +161,9 @@ minetest.register_on_joinplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	privs.vote = true
 	privs.register = true
-	privs.fast = true
-	privs.fly = true
-	privs.interact = false
+	privs.fast = nil
+	privs.fly = nil
+	privs.interact = nil
 	minetest.set_player_privs(name, privs)
 	minetest.chat_send_player(name, "You are now spectating")
 	spawning.spawn(player, "lobby")
@@ -175,7 +174,7 @@ minetest.register_on_newplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	privs.register = true
 	minetest.set_player_privs(name, privs)
-	
+
 end)
 
 minetest.register_on_leaveplayer(function(player)
@@ -224,6 +223,19 @@ minetest.register_chatcommand("hg", {
 		elseif parms[1] == "stop" then
 			stop_game()
 			minetest.chat_send_all("The Hunger Games has been stopped!")
+		elseif parms[1] == "build" then
+			if not ingame then
+				local privs = minetest.get_player_privs(name)
+				privs.interact = true
+				privs.fly = true
+				privs.fast = true
+				minetest.set_player_privs(name, privs)
+
+				minetest.chat_send_player(name, "You now have interact and fly/fast!")
+			else
+				minetest.chat_send_player(name, "You cant build while in a match!")
+				return
+			end
 		elseif parms[1] == "set" then
 			if parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d") then
 				local pos = {}
@@ -248,7 +260,7 @@ minetest.register_chatcommand("vote", {
 	func = function(name, param)
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num == 1 then 
+		if num == 1 then
 			minetest.chat_send_player(name, "Need more players!")
 			return
 		end
@@ -256,7 +268,7 @@ minetest.register_chatcommand("vote", {
 			local privs = minetest.get_player_privs(name)
 			privs.vote = nil
 			minetest.set_player_privs(name, privs)
-			
+
 			votes = votes + 1
 			minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
 			check_votes()
@@ -302,9 +314,11 @@ minetest.register_chatcommand("build", {
 		if not ingame then
 				local privs = minetest.get_player_privs(name)
 				privs.interact = true
+				privs.fly = true
+				privs.fast = true
 				minetest.set_player_privs(name, privs)
-				
-				minetest.chat_send_player(name, "You now have interact!")
+
+				minetest.chat_send_player(name, "You now have interact and fly/fast!")
 		else
 			minetest.chat_send_player(name, "You cant build while in a match!")
 			return
