@@ -36,7 +36,7 @@ minetest.after(0, function()
 	table.sort(creative_list)
 	inv:set_size("main", #creative_list)
 	for _,itemstring in ipairs(creative_list) do
-		inv:add_item("main", ItemStack(itemstring))
+		inv:add_item("main", ItemStack(itemstring.." 99"))
 	end
 	creative_inventory.creative_inventory_size = #creative_list
 	print("creative inventory size: "..dump(creative_inventory.creative_inventory_size))
@@ -109,11 +109,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	creative_inventory.set_creative_formspec(player, start_i, start_i / (6*4) + 1)
 end)
 
-minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
-	if minetest.get_player_privs(placer:get_player_name()).hg_maker then
-		return true
-	end
-end)
 
 if minetest.setting_getbool("creative_mode") then
 	
