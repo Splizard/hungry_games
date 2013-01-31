@@ -16,13 +16,6 @@ glass_arena.set_texture("default_glass.png")
 -----------------------------------
 --------Spawn configuration--------
 
---Set what happens to players when they join. [SAFE]
-spawning.on_join("spectate")
-
---Set what happens to players on death. [SAFE]
---Defaults to nothing.
-spawning.on_death("spectate")
-
 --Set spawn points. [SAFE]
 --NOTE: is overiden by hg_admin commands and save file.
 spawning.register_spawn("spawn",{
@@ -33,6 +26,7 @@ spawning.register_spawn("lobby",{
 	mode = "static", 
 	pos = {x=0,y=0,z=0},
 })
+
 -----------------------------------
 --------Chest configuration--------
 local chest_item = random_chests.register_item

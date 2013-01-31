@@ -147,6 +147,14 @@ end
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
 	check_win()
+	local name = player:get_player_name()
+   	local privs = minetest.get_player_privs(name)
+	privs.fast = true
+	privs.fly = true
+	privs.interact = false
+	minetest.set_player_privs(name, privs)
+	minetest.auth_reload()
+	minetest.chat_send_player(name, "You are now spectating")
 end)
 
 minetest.register_on_joinplayer(function(player)
@@ -154,8 +162,11 @@ minetest.register_on_joinplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	privs.vote = true
 	privs.register = true
+	privs.fast = true
+	privs.fly = true
+	privs.interact = false
 	minetest.set_player_privs(name, privs)
-	
+	minetest.chat_send_player(name, "You are now spectating")
 	spawning.spawn(player, "lobby")
 end)
 
