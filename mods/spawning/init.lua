@@ -69,19 +69,26 @@ function spawning.on_join(mode)
 	end
 end
 
+--Set spawn pos
 function spawning.set_spawn(place, pos)
 	local spawn = registered_spawns[place]
-
+	if not spawn then spawning.register_spawn(place, {}) end
+	
 	registered_spawns[place].pos = pos
 	
 	--Save spawns.
 	spawning.save_spawns()
 end
 
+function spawning.is_spawn(place)
+	local spawn = registered_spawns[place]
+	if not spawn then return false else return true end
+end
+
 function spawning.spawn(player, place)
 	local spawn = registered_spawns[place]
 	if spawn then
-		if spawn.mode == "static" then
+		--if spawn.mode == "static" then
 		   	local pos = spawn.pos
 		   	local env = minetest.env
 		   	if pos then
@@ -106,7 +113,7 @@ function spawning.spawn(player, place)
 				player:setpos(pos)
 				return true
 			end
-		end
+		--end
 	end
 end
 
