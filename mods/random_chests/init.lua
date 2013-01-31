@@ -114,14 +114,18 @@ function random_chests.refill(i)
 	if i == nil then i = 1 end
 	local s = i
 	while i <= table.getn(chests) do
-		if env:get_node(chests[i]).name ~= "default:chest" then
-			table.remove(chests,i)
-		else
-			fill_chest(chests[i])
-		end
-		if i > (s+(chests_interval/2)) then
-			minetest.after(0.5,random_chests.refill, i)
-			return
+		if chests[i] then
+			local n = env:get_node(chests[i]).name
+			if (not n:match("default:chest")) and n ~= "ignore" then
+				table.remove(chests,i)
+				print(env:get_node(chests[i]).name)
+			else
+				fill_chest(chests[i])
+			end
+			if i > (s+(chests_interval/2)) then
+				minetest.after(0.5,random_chests.refill, i)
+				return
+			end
 		end
 		i = i + 1
 	end
