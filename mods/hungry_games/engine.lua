@@ -16,10 +16,10 @@ local stop_game = function()
 	   	local privs = minetest.get_player_privs(name)
 		privs.fast = true
 		privs.fly = true
-		privs.interact = false
+		privs.interact = nil
 		privs.vote = true
 		minetest.set_player_privs(name, privs)	
-		minetest.notify_authentication_modified()
+		
 		player:set_hp(20)
 		spawning.spawn(player, "lobby")
 	end
@@ -51,7 +51,7 @@ local check_win = function()
 					winner = name
 					privs.fast = true
 					privs.fly = true
-					privs.interact = false
+					privs.interact = nil
 					minetest.set_player_privs(name, privs)
 					minetest.chat_send_player(name, "You are now spectating")
 					inv = player:get_inventory()
@@ -61,7 +61,7 @@ local check_win = function()
 					end
 				end
 			end
-			minetest.notify_authentication_modified()
+			
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 			   	local privs = minetest.get_player_privs(name)
@@ -73,7 +73,7 @@ local check_win = function()
 			else
 				minetest.chat_send_all("The Hungry Games is now over!  No survivors!")	
 			end
-			minetest.notify_authentication_modified()
+			
 			stop_game()
 		end
 	end
@@ -108,12 +108,12 @@ local start_game = function()
 			local name = player:get_player_name()
 			local privs = minetest.get_player_privs(name)
 			if registrants[name] == true and spawning.is_spawn("player_"..i) then
-				privs.fast = false
-				privs.fly = false
+				privs.fast = nil
+				privs.fly = nil
 				privs.interact = true
-				privs.vote = false
+				privs.vote = nil
 				minetest.set_player_privs(name, privs)
-				minetest.notify_authentication_modified()
+				
 				player:set_hp(20)
 				spawning.spawn(player, "player_"..i)
 				hunger.reset(name)
@@ -130,7 +130,6 @@ local start_game = function()
 	minetest.chat_send_all("You have 1min until grace period ends!")
 	minetest.setting_set("enable_pvp", "false")
 	minetest.after(60, end_grace)
-	minetest.notify_authentication_modified()
 	votes = 0
 	ingame = true
 end
@@ -156,7 +155,7 @@ minetest.register_on_joinplayer(function(player)
 	privs.vote = true
 	privs.register = true
 	minetest.set_player_privs(name, privs)
-	minetest.notify_authentication_modified()
+	
 	spawning.spawn(player, "lobby")
 end)
 
@@ -165,7 +164,7 @@ minetest.register_on_newplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	privs.register = true
 	minetest.set_player_privs(name, privs)
-	minetest.notify_authentication_modified()
+	
 end)
 
 minetest.register_on_leaveplayer(function(player)
@@ -244,9 +243,9 @@ minetest.register_chatcommand("vote", {
 		end
 		if not ingame then
 			local privs = minetest.get_player_privs(name)
-			privs.vote = false
+			privs.vote = nil
 			minetest.set_player_privs(name, privs)
-			minetest.notify_authentication_modified()
+			
 			votes = votes + 1
 			minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
 			check_votes()
@@ -293,7 +292,7 @@ minetest.register_chatcommand("build", {
 				local privs = minetest.get_player_privs(name)
 				privs.interact = true
 				minetest.set_player_privs(name, privs)
-				minetest.notify_authentication_modified()
+				
 				minetest.chat_send_player(name, "You now have interact!")
 		else
 			minetest.chat_send_player(name, "You cant build while in a match!")
@@ -316,3 +315,4 @@ minetest.register_tool(":default:admin_pick", {
 		}
 	},
 })
+
