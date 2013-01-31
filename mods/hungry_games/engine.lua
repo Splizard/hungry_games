@@ -14,12 +14,11 @@ local stop_game = function()
 	for _,player in ipairs(minetest.get_connected_players()) do
 		local name = player:get_player_name()
 	   	local privs = minetest.get_player_privs(name)
-		privs.fast = true
-		privs.fly = true
+		privs.fast = nil
+		privs.fly = nil
 		privs.interact = nil
 		privs.vote = true
 		minetest.set_player_privs(name, privs)
-
 		player:set_hp(20)
 		spawning.spawn(player, "lobby")
 	end
@@ -113,7 +112,6 @@ local start_game = function()
 				privs.interact = true
 				privs.vote = nil
 				minetest.set_player_privs(name, privs)
-
 				player:set_hp(20)
 				spawning.spawn(player, "player_"..i)
 				hunger.reset(name)
