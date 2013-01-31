@@ -118,7 +118,9 @@ function random_chests.refill(i)
 			local n = env:get_node(chests[i]).name
 			if (not n:match("default:chest")) and n ~= "ignore" then
 				table.remove(chests,i)
+				print("chest missing! found:")
 				print(env:get_node(chests[i]).name)
+				print("instead")
 			else
 				fill_chest(chests[i])
 			end
