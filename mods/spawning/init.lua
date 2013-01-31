@@ -56,9 +56,13 @@ function spawning.is_spawn(place)
 end
 
 function spawning.spawn(player, place)
+	if type(player) == "table" then place = player[2] player = player[1] end
 	local spawn = registered_spawns[place]
 	if spawn then
 	   	local pos = spawn.pos
+	   	if player:get_player_control().sneak then
+	   		minetest.after(1, spawning.spawn, {player, place})
+	   	end
 		player:setpos(pos)
 	end
 end
