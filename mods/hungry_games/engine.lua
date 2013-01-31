@@ -12,15 +12,17 @@ end
 
 local stop_game = function()
 	for _,player in ipairs(minetest.get_connected_players()) do
-		local name = player:get_player_name()
-	   	local privs = minetest.get_player_privs(name)
-		privs.fast = nil
-		privs.fly = nil
-		privs.interact = nil
-		privs.vote = true
-		minetest.set_player_privs(name, privs)
-		player:set_hp(20)
-		spawning.spawn(player, "lobby")
+		minetest.after(0.1, function()
+			local name = player:get_player_name()
+		   	local privs = minetest.get_player_privs(name)
+			privs.fast = nil
+			privs.fly = nil
+			privs.interact = nil
+			privs.vote = true
+			minetest.set_player_privs(name, privs)
+			player:set_hp(20)
+			spawning.spawn(player, "lobby")
+		end)
 	end
 	registrants = {}
 	ingame = false
@@ -152,6 +154,10 @@ minetest.register_on_dieplayer(function(player)
 	privs.interact = nil
 	minetest.set_player_privs(name, privs)
 	minetest.chat_send_player(name, "You are now spectating")
+end)
+
+minetest.register_on_respawnplayer(function(player)
+	player:set_hp(1)
 end)
 
 minetest.register_on_joinplayer(function(player)

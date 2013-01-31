@@ -60,9 +60,6 @@ function spawning.spawn(player, place)
 	local spawn = registered_spawns[place]
 	if spawn then
 	   	local pos = spawn.pos
-	   	if player:get_player_control().sneak then
-	   		minetest.after(1, spawning.spawn, {player, place})
-	   	end
 		player:setpos(pos)
 	end
 end
