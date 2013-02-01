@@ -6,7 +6,7 @@ local players_hungry = 			{}		-- Counts the hunger of the player
 
 local steady_hurt_time					-- When the hunger of the player is higher than this he will die very fast
 
-local START_HUNGER_SECONDS = 	360 	-- 12 minuets equal one day
+local START_HUNGER_SECONDS = 	230 	-- 3 minutes
 local FACTOR_HUNGER_SECONDS = 	2
 local MIN_HUNGER_SECONDS = 		1		-- Scheduled damage offsets won't be shorter than this. To prevent infinite calculations.
 local HUNGER_DAMAGE = 			1		-- The damage dealt per scheduled offset.
