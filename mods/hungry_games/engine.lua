@@ -149,6 +149,9 @@ minetest.register_on_dieplayer(function(player)
 	check_win()
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
+   	if privs.interact then
+   		minetest.sound_play("hungry_games_death")
+   	end
 	privs.fast = true
 	privs.fly = true
 	privs.interact = nil
