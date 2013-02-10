@@ -91,40 +91,23 @@ local get_spots = function()
 	end
 end
 
-local start_game = function()
-	print("filling chests...")
-	random_chests.refill()
-	local i = 1
-	--Find out how many spots there are to spawn
-	local spots = get_spots()
-	local diff =  spots-table.getn(registrants)
-	for _,player in pairs(minetest.get_connected_players() ) do
-		if diff > 0 then
-			registrants[player:get_player_name()] = true
-			diff = diff - 1
-		end
+local start_game_now = function(contestants)
+	for i,player in ipairs(contestants) do
+		local name = player:get_player_name()
+		local privs = minetest.get_player_privs(name)
+		privs.fast = nil
+		privs.fly = nil
+		privs.interact = true
+		privs.vote = nil
+		minetest.set_player_privs(name, privs)
 		minetest.after(0.1, function(table)
 			player = table[1]
 			i = table[2]
 			local name = player:get_player_name()
-			local privs = minetest.get_player_privs(name)
-			if registrants[name] == true and spawning.is_spawn("player_"..i) then
-				privs.fast = nil
-				privs.fly = nil
-				privs.interact = true
-				privs.vote = nil
-				minetest.set_player_privs(name, privs)
-				player:set_hp(20)
+			if spawning.is_spawn("player_"..i) then
 				spawning.spawn(player, "player_"..i)
-				hunger.reset(name)
-			else
-				minetest.chat_send_player(name, "There are no spots for you to spawn!")
-				if privs.hg_admin then
-					minetest.chat_send_player(name, "Try setting some with the /hg set player_*")
-				end
 			end
 		end, {player, i})
-		if registrants[player:get_player_name()] then i = i + 1 end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
 	minetest.chat_send_all("You have 1min until grace period ends!")
@@ -133,6 +116,58 @@ local start_game = function()
 	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
+end
+
+local start_game = function()
+	print("filling chests...")
+	random_chests.refill()
+	local i = 1
+	--Find out how many spots there are to spawn
+	local spots = get_spots()
+	local diff =  spots-table.getn(registrants)
+	local contestants = {}
+	for _,player in pairs(minetest.get_connected_players() ) do
+		if diff > 0 then
+			registrants[player:get_player_name()] = true
+			diff = diff - 1
+		end
+		minetest.after(0.1, function(list)
+			player = list[1]
+			i = list[2]
+			local name = player:get_player_name()
+			if registrants[name] == true and spawning.is_spawn("player_"..i) then
+				player:set_hp(20)
+				table.insert(contestants, player)
+				spawning.spawn(player, "player_"..i)
+				hunger.reset(name)
+			else
+				minetest.chat_send_player(name, "There are no spots for you to spawn!")
+				if privs.hg_admin then
+					minetest.chat_send_player(name, "Try setting some with the /hg set player_#")
+				end
+			end
+		end, {player, i})
+		if registrants[player:get_player_name()] then i = i + 1 end
+	end
+	minetest.chat_send_all("Starting in "..dump(10))
+	for i=1, 9 do
+		minetest.after(i, function(list)
+			contestants = list[1]
+			i = list[2]
+			minetest.chat_send_all("Starting in "..dump(10-i))
+			for i,player in ipairs(contestants) do
+				minetest.after(0.1, function(table)
+					player = table[1]
+					i = table[2]
+					local name = player:get_player_name()
+					if spawning.is_spawn("player_"..i) then
+						spawning.spawn(player, "player_"..i)
+					end
+				end, {player, i})
+			end
+		end, {contestants,i})
+	end
+	minetest.after(10, start_game_now, contestants)
 end
 
 local check_votes = function()
