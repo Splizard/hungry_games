@@ -130,6 +130,7 @@ local start_game = function()
 	minetest.chat_send_all("You have 1min until grace period ends!")
 	minetest.setting_set("enable_pvp", "false")
 	minetest.after(60, end_grace)
+	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
 end
