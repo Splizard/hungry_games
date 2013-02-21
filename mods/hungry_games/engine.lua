@@ -385,3 +385,14 @@ minetest.register_tool(":default:admin_pick", {
 	},
 })
 
+minetest.register_craftitem("hungry_games:planks", {
+	description = "Planks",
+	inventory_image = "default_wood.png",
+	groups = {wood=1},
+})
+
+minetest.register_craftitem("hungry_games:stones", {
+	description = "Stones",
+	inventory_image = "default_cobble.png",
+	groups = {stone=1},
+})

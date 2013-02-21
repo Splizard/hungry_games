@@ -854,7 +854,7 @@ minetest.register_node("default:tree", {
 	description = "Tree",
 	tiles = {"default_tree_top.png", "default_tree_top.png", "default_tree.png"},
 	is_ground_content = true,
-	groups = {tree=1,snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2},
+	groups = {tree=1,snappy=1,choppy=2,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -862,7 +862,7 @@ minetest.register_node("default:jungletree", {
 	description = "Jungle Tree",
 	tiles = {"default_jungletree_top.png", "default_jungletree_top.png", "default_jungletree.png"},
 	is_ground_content = true,
-	groups = {tree=1,snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2},
+	groups = {tree=1,snappy=1,choppy=2,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -885,6 +885,8 @@ minetest.register_node("default:leaves", {
 	visual_scale = 1.3,
 	tiles = {"default_leaves.png"},
 	paramtype = "light",
+	walkable = false,
+	climbable = true,
 	groups = {snappy=3, leafdecay=3, flammable=2,oddly_breakable_by_hand=2},
 	drop = {
 		max_items = 1,
@@ -908,7 +910,7 @@ minetest.register_node("default:cactus", {
 	description = "Cactus",
 	tiles = {"default_cactus_top.png", "default_cactus_top.png", "default_cactus_side.png"},
 	is_ground_content = true,
-	groups = {snappy=2,choppy=3,flammable=2,oddly_breakable_by_hand=1},
+	groups = {snappy=2,choppy=3,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -933,7 +935,7 @@ minetest.register_node("default:bookshelf", {
 	description = "Bookshelf",
 	tiles = {"default_wood.png", "default_wood.png", "default_bookshelf.png"},
 	is_ground_content = true,
-	groups = {snappy=2,choppy=3,oddly_breakable_by_hand=2,flammable=3},
+	groups = {snappy=2,choppy=3,flammable=3},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -945,7 +947,7 @@ minetest.register_node("default:glass", {
 	paramtype = "light",
 	sunlight_propagates = true,
 	is_ground_content = true,
-	groups = {snappy=2,cracky=3,oddly_breakable_by_hand=3},
+	groups = {snappy=2,cracky=3},
 	sounds = default.node_sound_glass_defaults(),
 })
 
@@ -961,7 +963,7 @@ minetest.register_node("default:fence_wood", {
 		type = "fixed",
 		fixed = {-1/7, -1/2, -1/7, 1/7, 1/2, 1/7},
 	},
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=2,flammable=2},
+	groups = {snappy=1,choppy=2,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -1008,7 +1010,7 @@ minetest.register_node("default:wood", {
 	description = "Wooden Planks",
 	tiles = {"default_wood.png"},
 	is_ground_content = true,
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=2,flammable=3,wood=1},
+	groups = {snappy=1,choppy=2,flammable=3,wood=1},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -1250,7 +1252,7 @@ minetest.register_node("default:chest_locked", {
 	tiles = {"default_chest_top.png", "default_chest_top.png", "default_chest_side.png",
 		"default_chest_side.png", "default_chest_side.png", "default_chest_lock.png"},
 	paramtype2 = "facedir",
-	groups = {snappy=2,choppy=2,oddly_breakable_by_hand=2},
+	groups = {snappy=2,choppy=2},
 	legacy_facedir_simple = true,
 	sounds = default.node_sound_wood_defaults(),
 	after_place_node = function(pos, placer)
