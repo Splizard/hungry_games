@@ -56,57 +56,68 @@ local trash = minetest.create_detached_inventory("creative_trash", {
 trash:set_size("main", 1)
 
 
-creative_inventory.set_creative_formspec = function(player, start_i, pagenum)
+local get_formspec = function(player,start_i, pagenum)
+	if not minetest.get_player_privs(player:get_player_name()).hg_maker then
+		return
+	end
 	pagenum = math.floor(pagenum)
 	local pagemax = math.floor((creative_inventory.creative_inventory_size-1) / (6*4) + 1)
-	player:set_inventory_formspec("size[13,7.5]"..
+	return "size[13,7.5]"..
 			--"image[6,0.6;1,2;player.png]"..
+			"button[0,0;2,0.5;main;Back]"..
 			"list[current_player;main;5,3.5;8,4;]"..
 			"list[current_player;craft;8,0;3,3;]"..
 			"list[current_player;craftpreview;12,1;1,1;]"..
 			"list[detached:creative;main;0.3,0.5;4,6;"..tostring(start_i).."]"..
 			"label[2.0,6.55;"..tostring(pagenum).."/"..tostring(pagemax).."]"..
-			"button[0.3,6.5;1.6,1;creative_prev;<<]"..
-			"button[2.7,6.5;1.6,1;creative_next;>>]"..
+			"button[0.3,6.5;1.6,1;hg_prev;<<]"..
+			"button[2.7,6.5;1.6,1;hg_next;>>]"..
 			"label[5,1.5;Trash:]"..
-			"list[detached:creative_trash;main;5,2;1,1;]")
+			"list[detached:creative_trash;main;5,2;1,1;]"
 end
 minetest.register_on_joinplayer(function(player)
 	-- If in creative mode, modify player's inventory forms
 	if not minetest.get_player_privs(player:get_player_name()).hg_maker then
 		return
 	end
-	creative_inventory.set_creative_formspec(player, 0, 1)
+	inventory_plus.register_button(player,"hgmaker","HG Maker")
 end)
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if not minetest.get_player_privs(player:get_player_name()).hg_maker then
-		return
-	end
+
 	-- Figure out current page from formspec
 	local current_page = 0
 	local formspec = player:get_inventory_formspec()
 	local start_i = string.match(formspec, "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]")
 	start_i = tonumber(start_i) or 0
 
-	if fields.creative_prev then
-		start_i = start_i - 4*6
-	end
-	if fields.creative_next then
-		start_i = start_i + 4*6
-	end
-
-	if start_i < 0 then
-		start_i = start_i + 4*6
-	end
-	if start_i >= creative_inventory.creative_inventory_size then
-		start_i = start_i - 4*6
-	end
+	local function setformspec()
+		if start_i < 0 then
+			start_i = start_i + 4*6
+		end
+		if start_i >= creative_inventory.creative_inventory_size then
+			start_i = start_i - 4*6
+		end
 		
-	if start_i < 0 or start_i >= creative_inventory.creative_inventory_size then
-		start_i = 0
-	end
+		if start_i < 0 or start_i >= creative_inventory.creative_inventory_size then
+			start_i = 0
+		end
 
-	creative_inventory.set_creative_formspec(player, start_i, start_i / (6*4) + 1)
+		inventory_plus.set_inventory_formspec(player, get_formspec(player, start_i, start_i / (6*4) + 1))
+	end
+	
+	if fields.hg_prev then
+		start_i = start_i - 4*6
+		setformspec()
+	end
+	if fields.hg_next then
+		start_i = start_i + 4*6
+		setformspec()
+	end
+	
+	if fields.hgmaker then
+		setformspec()
+	end
+	
 end)
 
 
