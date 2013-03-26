@@ -1,4 +1,0 @@
-sound:		hunger_stomach 1 & 2 are based on "Stomach Growling Sound" by XxBirdoxX. Licence cc-by, original licence Sampling Plus 1.0.
-texture:	cc0 by Jetrel http://opengameart.org/content/rpg-item-set
-
-code: 		cc-by-sa Casimir

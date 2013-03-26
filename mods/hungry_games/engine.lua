@@ -91,6 +91,13 @@ local get_spots = function()
 	end
 end
 
+local reset_player_state = function(player)
+	local name = player:get_player_name()
+	player:set_hp(20)
+	survival.reset_player_state(name, "hunger")
+	survival.reset_player_state(name, "thirst")
+end
+
 local start_game_now = function(contestants)
 	for i,player in ipairs(contestants) do
 		local name = player:get_player_name()
@@ -136,10 +143,9 @@ local start_game = function()
 			i = list[2]
 			local name = player:get_player_name()
 			if registrants[name] == true and spawning.is_spawn("player_"..i) then
-				player:set_hp(20)
 				table.insert(contestants, player)
 				spawning.spawn(player, "player_"..i)
-				hunger.reset(name)
+				reset_player_state(player)
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
 				if privs.hg_admin then
