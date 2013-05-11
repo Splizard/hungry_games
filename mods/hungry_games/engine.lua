@@ -117,9 +117,15 @@ local start_game_now = function(contestants)
 		end, {player, i})
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
-	minetest.chat_send_all("You have 1min until grace period ends!")
-	minetest.setting_set("enable_pvp", "false")
-	minetest.after(60, end_grace)
+	if hungry_games.grace_period > 0 then
+		if hungry_games.grace_period >= 60 then
+			minetest.chat_send_all("You have "..(dump(hungry_games.grace_period)/60).."min"..(((hungry_games.grace_period > 60) and "s") or "").." until grace period ends!")
+		else
+			minetest.chat_send_all("You have "..dump(hungry_games.grace_period).."second"..(((hungry_games.grace_period > 1) and "s") or "").." until grace period ends!")
+		end
+		minetest.setting_set("enable_pvp", "false")
+		minetest.after(hungry_games.grace_period, end_grace)
+	end
 	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
@@ -155,25 +161,29 @@ local start_game = function()
 		end, {player, i})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
-	minetest.chat_send_all("Starting in "..dump(10))
-	for i=1, 9 do
-		minetest.after(i, function(list)
-			contestants = list[1]
-			i = list[2]
-			minetest.chat_send_all("Starting in "..dump(10-i))
-			for i,player in ipairs(contestants) do
-				minetest.after(0.1, function(table)
-					player = table[1]
-					i = table[2]
-					local name = player:get_player_name()
-					if spawning.is_spawn("player_"..i) then
-						spawning.spawn(player, "player_"..i)
-					end
-				end, {player, i})
-			end
-		end, {contestants,i})
+	if hungry_games.countdown > 0 then
+		minetest.chat_send_all("Starting in "..dump(hungry_games.countdown))
+		for i=1, (hungry_games.countdown-1) do
+			minetest.after(i, function(list)
+				contestants = list[1]
+				i = list[2]
+				minetest.chat_send_all("Starting in "..dump(hungry_games.countdown-i))
+				for i,player in ipairs(contestants) do
+					minetest.after(0.1, function(table)
+						player = table[1]
+						i = table[2]
+						local name = player:get_player_name()
+						if spawning.is_spawn("player_"..i) then
+							spawning.spawn(player, "player_"..i)
+						end
+					end, {player, i})
+				end
+			end, {contestants,i})
+		end
+		minetest.after(hungry_games.countdown, start_game_now, contestants)
+	else
+		start_game_now(contestants)
 	end
-	minetest.after(10, start_game_now, contestants)
 end
 
 local check_votes = function()
@@ -192,7 +202,7 @@ minetest.register_on_dieplayer(function(player)
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
    	if privs.interact or privs.fly then
-   		if privs.interact then 
+   		if privs.interact and (hungry_games.death_mode == "spectate") then 
    			minetest.sound_play("hungry_games_death")
 		   	privs.fast = true
 			privs.fly = true
@@ -207,9 +217,9 @@ minetest.register_on_respawnplayer(function(player)
 	player:set_hp(1)
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
-   	if privs.interact or privs.fly then
+   	if (privs.interact or privs.fly) and (hungry_games.death_mode == "spectate") then
 		spawning.spawn(player, "spawn")
-	else
+	elseif (hungry_games.death_mode == "lobby") then
 		spawning.spawn(player, "lobby")
 	end
 	return true

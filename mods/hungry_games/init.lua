@@ -15,6 +15,20 @@ glass_arena.set_size(200)
 glass_arena.set_texture("default_glass.png") 
 
 -----------------------------------
+-----Hungry Games configuration----
+hungry_games = {}
+
+--Set countdown (in seconds) till players can leave their spawns.
+hungry_games.countdown = 10
+
+--Set grace period length in seconds (or 0 for no grace period)
+hungry_games.grace_period = 60
+
+--Set what happens when a player dies during a match.
+--Possible values are: "spectate" or "lobby"
+hungry_games.death_mode = "spectate"
+
+-----------------------------------
 --------Spawn configuration--------
 
 --Set spawn points. [SAFE]
