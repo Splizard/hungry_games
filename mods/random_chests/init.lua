@@ -32,9 +32,13 @@ local fill_chest = function(pos)
 	end
 	--Spawn chest and add random items.
 	local invcontent = {}
+	local used_groups = {}
 	for i,v in pairs(random_items) do
-		if math.random(1, v[2]) == 1 then
-			table.insert(invcontent, v[1].." "..tostring(math.random(1,v[3])) )
+		if not used_groups[v[4]] then
+			if math.random(1, v[2]) == 1 then
+				table.insert(invcontent, v[1].." "..tostring(math.random(1,v[3])) )
+				if v[4] then used_groups[v[4]] = true end
+			end
 		end
 	end
 	minetest.env:add_node(pos,{name='default:chest', inv=invcontent})	
@@ -55,9 +59,9 @@ random_chests = {}
 
 --Register a new item that can be spawned in random chests.
 --eg random_chests.register_item('default:torch', 4, 6) #has a 1 in 4 chance of spawning up to 6 torches.
-function random_chests.register_item(item, rarity, max)
+function random_chests.register_item(item, rarity, max, group)
 	assert(item and rarity and max)
-	table.insert(random_items, {item, rarity, max})
+	table.insert(random_items, {item, rarity, max, group})
 end
 
 --Set rarity of the chests. (n = How many per chunk).
