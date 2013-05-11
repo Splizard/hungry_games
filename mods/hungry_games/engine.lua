@@ -191,18 +191,28 @@ minetest.register_on_dieplayer(function(player)
 	check_win()
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
-   	if privs.interact then
-   		minetest.sound_play("hungry_games_death")
+   	if privs.interact or privs.fly then
+   		if privs.interact then 
+   			minetest.sound_play("hungry_games_death")
+		   	privs.fast = true
+			privs.fly = true
+			privs.interact = nil
+			minetest.set_player_privs(name, privs)
+			minetest.chat_send_player(name, "You are now spectating")
+		end
    	end
-	privs.fast = true
-	privs.fly = true
-	privs.interact = nil
-	minetest.set_player_privs(name, privs)
-	minetest.chat_send_player(name, "You are now spectating")
 end)
 
 minetest.register_on_respawnplayer(function(player)
 	player:set_hp(1)
+	local name = player:get_player_name()
+   	local privs = minetest.get_player_privs(name)
+   	if privs.interact or privs.fly then
+		spawning.spawn(player, "spawn")
+	else
+		spawning.spawn(player, "lobby")
+	end
+	return true
 end)
 
 minetest.register_on_joinplayer(function(player)
