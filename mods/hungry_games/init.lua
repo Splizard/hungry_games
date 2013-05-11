@@ -4,6 +4,7 @@
 	Feilds Marked with [SAFE] are safe to edit if you already have worlds generated.
 ]]--
 dofile(minetest.get_modpath("hungry_games").."/engine.lua")
+dofile(minetest.get_modpath("hungry_games").."/weapons.lua")
 -----------------------------------
 --------Arena configuration--------
 
