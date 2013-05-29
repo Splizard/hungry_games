@@ -1,4 +1,5 @@
 local votes = 0
+local starting_game = false
 local ingame = false
 
 local registrants = {}
@@ -130,9 +131,14 @@ local start_game_now = function(contestants)
 	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
+	starting_game = false
 end
 
 local start_game = function()
+	if starting_game then
+		return
+	end
+	starting_game = true
 	print("filling chests...")
 	random_chests.refill()
 	local i = 1
@@ -342,6 +348,14 @@ minetest.register_chatcommand("vote", {
 
 			votes = votes + 1
 			minetest.chat_send_all(name.. " has have voted to begin! votes so far: "..votes.." votes needed: "..((num > 5 and num*0.75) or num) )
+			if votes > 1 then
+				minetest.chat_send_all("The match will start in 5mins max.")
+				minetest.after((60*5), function () 
+					if not (starting_game or ingame) then
+						start_game()
+					end
+				end)
+			end
 			check_votes()
 		else
 			minetest.chat_send_player(name, "Already ingame!")
