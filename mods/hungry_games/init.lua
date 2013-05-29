@@ -4,7 +4,6 @@
 	Feilds Marked with [SAFE] are safe to edit if you already have worlds generated.
 ]]--
 dofile(minetest.get_modpath("hungry_games").."/engine.lua")
-dofile(minetest.get_modpath("hungry_games").."/weapons.lua")
 -----------------------------------
 --------Arena configuration--------
 
@@ -13,6 +12,20 @@ glass_arena.set_size(200)
 
 --Set texture of the arena. [SAFE]
 glass_arena.set_texture("default_glass.png") 
+
+--Set which blocks to replace with wall (remove table brackets "{}" for all blocks).
+glass_arena.replace({
+	"air",
+	"ignore",
+	"default:water_source",
+	"default:water_flowing",
+	"default:lava_source",
+	"default:lava_flowing",
+	"default:cactus",
+	"default:leaves",
+	"default:tree",
+	"snow:snow"
+}) 
 
 -----------------------------------
 -----Hungry Games configuration----
@@ -27,6 +40,11 @@ hungry_games.grace_period = 60
 --Set what happens when a player dies during a match.
 --Possible values are: "spectate" or "lobby"
 hungry_games.death_mode = "spectate"
+
+--Set what players can dig, should be modifyed along with glass_arena.replace
+-- (See Above Section)
+--Values "none" (can't dig), "restricted" (only dig with hand), "normal" (normal minetest). 
+hungry_games.dig_mode = "restricted"
 
 -----------------------------------
 --------Spawn configuration--------
@@ -124,4 +142,9 @@ chest_item('farming:string', 7, 3)
 chest_item('hungry_games:stones', 6, 3)
 chest_item('food:cup', 5, 2)
 chest_item('hungry_games:planks', 5, 3)
+
+--END OF CONFIG OPTIONS
+if hungry_games.dig_mode ~= "normal" then
+	dofile(minetest.get_modpath("hungry_games").."/weapons.lua")
+end
 

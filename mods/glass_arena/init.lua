@@ -1,5 +1,6 @@
 local arena_size = 200
 arena_size = arena_size/2
+local replace = {}
 
 glass_arena = {}
 
@@ -91,6 +92,10 @@ function glass_arena.teleport(player)
 	return true
 end
 
+function glass_arena.replace(list)
+	replace = list
+end
+
 --Regenerate walls if pieces are missing
 minetest.register_abm({
     nodenames = {"glass_arena:wall_middle"},
@@ -157,15 +162,18 @@ minetest.register_abm({
 
 minetest.register_on_generated(function(minp, maxp, seed)
 	local database = minetest.registered_nodes
+	local replace = replace
 	local function should_replace(pos)
 		local node = minetest.env:get_node(pos)
 		local name = node.name
-		if node.name == "air" or node.name == "ignore" or 
-			node.name == "default:water_source" or node.name == "default:water_flowing" or
-			node.name == "default:lava_source" or node.name == "default:lava_flowing" or
-			node.name == "default:cactus" or node.name == "default:leaves" or node.name == "snow:needles" or
-			node.name == "default:tree" or node.name == "snow:snow" then
+		if (not replace) or #replace == 0 then
 			return true
+		else
+			for i,v in pairs(replace) do
+				if name == v then
+					return true
+				end
+			end
 		end
 		if not database[name].walkable then
 			return true
