@@ -58,9 +58,12 @@ end
 function spawning.spawn(player, place)
 	if type(player) == "table" then place = player[2] player = player[1] end
 	local spawn = registered_spawns[place]
+	local pos = spawn.pos
 	if spawn then
-	   	local pos = spawn.pos
 		player:setpos(pos)
+	end
+	for i,v in pairs(minetest.env:find_nodes_in_area({x=pos.x-20,y=pos.y-20,z=pos.z-20}, {x=pos.x+20,y=pos.y+20,z=pos.z+20}, "default:lava_source")) do
+		minetest.env:remove_node(v)
 	end
 end
 

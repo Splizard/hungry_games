@@ -126,6 +126,7 @@ local start_game_now = function(contestants)
 		minetest.setting_set("enable_pvp", "false")
 		minetest.after(hungry_games.grace_period, end_grace)
 	end
+	minetest.setting_set("enable_damage", "true")
 	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
@@ -161,6 +162,7 @@ local start_game = function()
 		end, {player, i})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
+	minetest.setting_set("enable_damage", "false")
 	if hungry_games.countdown > 0 then
 		minetest.chat_send_all("Starting in "..dump(hungry_games.countdown))
 		for i=1, (hungry_games.countdown-1) do
