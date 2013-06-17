@@ -1,37 +1,11 @@
-===FARMING MOD for MINETEST-C55===
-by PilzAdam
+Minetest 0.4 mod: farming
+=========================
 
-Introduction: 
-This mod adds farming to Minetest.
+License of source code:
+-----------------------
+Copyright (C) 2012-2013 PilzAdam
 
-How to install:
-Unzip the archive an place it in minetest-base-directory/mods/minetest/
-if you have a windows client or a linux run-in-place client. If you have
-a linux system-wide instalation place it in ~/.minetest/mods/minetest/.
-If you want to install this mod only in one world create the folder
-worldmods/ in your worlddirectory.
-For further information or help see:
-http://wiki.minetest.com/wiki/Installing_Mods
-
-How to use the mod:
-Craft a wood/stone/steel hoe:
-material	material
-			stick
-			stick
-Dig dirt with it and turn it to soil. Water the soil and plant the seeds
-you get by digging dirt with the hoe. Wait until the seeds are seasoned
-and harvest them. When harvesting you will get the product and new seeds.
-For further information or help see:
-http://minetest.net/forum/viewtopic.php?id=2787
-
-License:
-Sourcecode: WTFPL (see below)
-Graphics: WTFPL (see below)
-
-See also:
-http://minetest.net/
-
-         DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                     Version 2, December 2004
 
  Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
@@ -44,3 +18,40 @@ http://minetest.net/
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. You just DO WHAT THE FUCK YOU WANT TO. 
+
+License of media (textures):
+----------------------------
+Created by PilzAdam (License: WTFPL):
+  farming_bread.png
+  farming_soil.png
+  farming_soil_wet.png
+  farming_soil_wet_side.png
+  farming_string.png
+
+Created by Calinou (License: CC BY-SA):
+  farming_tool_bronzehoe.png
+  farming_tool_steelhoe.png
+  farming_tool_stonehoe.png
+  farming_tool_woodhoe.png
+
+Created by VanessaE (License: WTFPL):
+  farming_cotton_seed.png
+  farming_wheat_seed.png
+  farming_flour.png
+  farming_wheat.png
+  farming_wheat_1.png
+  farming_wheat_2.png
+  farming_wheat_3.png
+  farming_wheat_4.png
+  farming_wheat_5.png
+  farming_wheat_5.png
+  farming_wheat_7.png
+  farming_wheat_8.png
+  farming_cotton_1.png
+  farming_cotton_2.png
+  farming_cotton_3.png
+  farming_cotton_4.png
+  farming_cotton_5.png
+  farming_cotton_6.png
+  farming_cotton_7.png
+  farming_cotton_8.png

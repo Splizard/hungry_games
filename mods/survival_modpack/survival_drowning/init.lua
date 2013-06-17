@@ -78,6 +78,10 @@ survival.register_state("oxygen", {
             { "", "default:wood", "" },
         };
     };
+    hud = {
+        pos = {x=0.525, y=0.903};
+        icon = "survival_drowning_hud.png";
+    };
     get_default = function ( )
         return {
             count = 0;
@@ -93,7 +97,6 @@ survival.register_state("oxygen", {
     end;
     on_update = function ( dtime, player, state )
         local pos = player:getpos();
-        local name = player:get_player_name()
         pos.y = pos.y + 1;
         if (survival.drowning.is_player_under_liquid(player)) then
             state.count = state.count + dtime;

@@ -129,6 +129,11 @@ survival.register_state("thirst", {
             { "", "default:wood", "" },
         };
     };
+    hud = {
+        pos = {x=0.720, y=0.965};
+        image = "survival_thirst_water_glass.png";
+        --image = "survival_thirst_hud.png";
+    };
     get_default = function ( )
         return {
             count = 0;
@@ -143,7 +148,6 @@ survival.register_state("thirst", {
         end
     end;
     on_update = function ( dtime, player, state )
-    	local name = player:get_player_name()
         if (player:get_hp() > 0) then
             state.count = state.count + dtime;
             local name = player:get_player_name();
