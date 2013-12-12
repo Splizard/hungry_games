@@ -4,29 +4,32 @@ if not update_time then
 	update_time = 2
 	minetest.setting_set("wieldview_update_time", tostring(update_time))
 end
+local node_tiles = minetest.setting_getbool("wieldview_node_tiles")
+if not node_tiles then
+	node_tiles = false
+	minetest.setting_set("wieldview_node_tiles", "false")
+end
 
 wieldview = {
-	wielded_items = {},
+	wielded_item = {},
+	transform = {},
 }
 
-wieldview.get_wielded_item_texture = function(self, player)
-	if not player then
-		return nil
-	end
-	local stack = player:get_wielded_item()
-	local item = stack:get_name()
-	if not item then
-		return nil
-	end
-	if not minetest.registered_items[item] then
-		return nil
-	end
-	local texture = minetest.registered_items[item].inventory_image
-	if texture == "" then
-		if not minetest.registered_items[item].tiles then
-			return nil	
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/transform.lua")
+
+wieldview.get_item_texture = function(self, item)
+	local texture = "3d_armor_trans.png"
+	if item ~= "" then
+		if minetest.registered_items[item] then
+			if minetest.registered_items[item].inventory_image ~= "" then
+				texture = minetest.registered_items[item].inventory_image
+			elseif node_tiles == true and minetest.registered_items[item].tiles then
+				texture = minetest.registered_items[item].tiles[1]
+			end
 		end
-		texture = minetest.registered_items[item].tiles[1]
+		if wieldview.transform[item] then
+			texture = texture.."^[transform"..wieldview.transform[item]
+		end
 	end
 	return texture
 end
@@ -41,25 +44,21 @@ wieldview.update_wielded_item = function(self, player)
 	if not item then
 		return
 	end
-	if self.wielded_items[name] then
-		if self.wielded_items[name] == item then
+	if self.wielded_item[name] then
+		if self.wielded_item[name] == item then
 			return
 		end
-		uniskins:update_player_visuals(player)
+		armor.textures[name].wielditem = self:get_item_texture(item)
+		armor:update_player_visuals(player)
 	end
-	self.wielded_items[name] = item
+	self.wielded_item[name] = item
 end
 
 minetest.register_on_joinplayer(function(player)
-	local texture = uniskins:get_player_skin(name)
-	player:set_properties({
-		visual = "mesh",
-		mesh = "wieldview_character.x",
-		textures = {texture},
-		visual_size = {x=1, y=1},
-	})
+	local name = player:get_player_name()
+	wieldview.wielded_item[name] = ""
 	minetest.after(0, function(player)
-		uniskins:update_player_visuals(player)
+		wieldview:update_wielded_item(player)
 	end, player)
 end)
 
