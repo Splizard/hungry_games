@@ -159,31 +159,34 @@ survival.register_state("hunger", {
     end;
     on_update = function ( dtime, player, state )
         local name = player:get_player_name();
-        state.count = state.count + dtime;
-        if (state.flag and (state.count >= HUNGER_TIME)) then
-            local hp = player:get_hp();
-            state.count = 0;
-            if ((hp > 0) and ((hp - HUNGER_DAMAGE) <= 0)) then
-                minetest.chat_send_player(name, S("You died from starvation."));
-                state.count = 0;
-                state.flag = false;
-            end
-            player:set_hp(hp - HUNGER_DAMAGE);
-            minetest.sound_play({ name="survival_hunger_stomach" }, {
-                pos = player:getpos();
-                gain = 1.0;
-                max_hear_distance = 16;
-            });
-        elseif ((not state.flag) and (state.count >= START_HUNGER_TIME)) then
-            state.count = 0;
-            state.flag = true;
-            minetest.chat_send_player(name, S("You are hungry."));
-            minetest.sound_play({ name="survival_hunger_stomach" }, {
-                pos = player:getpos();
-                gain = 1.0;
-                max_hear_distance = 16;
-            });
-        end
+        local privs = minetest.get_player_privs(name)
+        if privs.interact then
+		    state.count = state.count + dtime;
+		    if (state.flag and (state.count >= HUNGER_TIME)) then
+		        local hp = player:get_hp();
+		        state.count = 0;
+		        if ((hp > 0) and ((hp - HUNGER_DAMAGE) <= 0)) then
+		            minetest.chat_send_player(name, S("You died from starvation."));
+		            state.count = 0;
+		            state.flag = false;
+		        end
+		        player:set_hp(hp - HUNGER_DAMAGE);
+		        minetest.sound_play({ name="survival_hunger_stomach" }, {
+		            pos = player:getpos();
+		            gain = 1.0;
+		            max_hear_distance = 16;
+		        });
+		    elseif ((not state.flag) and (state.count >= START_HUNGER_TIME)) then
+		        state.count = 0;
+		        state.flag = true;
+		        minetest.chat_send_player(name, S("You are hungry."));
+		        minetest.sound_play({ name="survival_hunger_stomach" }, {
+		            pos = player:getpos();
+		            gain = 1.0;
+		            max_hear_distance = 16;
+		        });
+		    end
+		end
     end;
 });
 

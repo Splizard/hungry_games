@@ -148,7 +148,9 @@ survival.register_state("thirst", {
         end
     end;
     on_update = function ( dtime, player, state )
-        if (player:get_hp() > 0) then
+   		local name = player:get_player_name();
+    	local privs = minetest.get_player_privs(name)
+        if (player:get_hp() > 0) and privs.interact then
             state.count = state.count + dtime;
             local name = player:get_player_name();
             if (state.thirsty and (state.count >= PASS_OUT_TIME)) then
