@@ -26,23 +26,6 @@ dofile(minetest.get_modpath("survival_lib").."/chatcmds.lua");
 survival.registered_states = { };
 
 survival.register_state = function ( name, def )
-    if (def.item) then
-        if (def.item.name) then
-            minetest.register_tool(def.item.name, {
-                description = def.item.description or "<Unnamed item>";
-                inventory_image = def.item.inventory_image;
-                on_use = def.item.on_use;
-            });
-            if (def.item.recipe) then
-                minetest.register_craft({
-                    output = def.item.name;
-                    recipe = def.item.recipe;
-                });
-            end
-        else
-            def.item = nil;
-        end
-    end
     if (def.command_name) then
         local lbl = (def.label or def.command_name);
         def.command_func = function ( name, param )
@@ -83,7 +66,7 @@ end
 
 survival.reset_player_state = function ( name, stname )
     if (name and stname and survival.registered_states[stname]) then
-        player_states[name][stname] = survival.registered_states[stname].get_default();
+        player_states[name][stname] = survival.registered_states[stname].get_default(player_states[name][stname].hudid);
     end
 end
 
@@ -147,7 +130,7 @@ minetest.register_on_joinplayer(function ( player )
     for i, def in ipairs(survival.registered_states) do
         local name = def.name;
         if (not player_states[plname][name]) then
-            player_states[plname][name] = def.get_default();
+            player_states[plname][name] = def.get_default(nil);
         end
     end
     minetest.after(0.5, function ( self )
@@ -156,6 +139,7 @@ minetest.register_on_joinplayer(function ( player )
             player_states[plname][def.name].hudid = player:hud_add({
                 hud_elem_type = "statbar";
                 position = def.hud.pos or HUD_DEFAULTS.pos;
+                offset = def.hud.offset;
                 scale = def.hud.scale or HUD_DEFAULTS.scale;
                 text = def.hud.image or HUD_DEFAULTS.image;
                 number = def.hud.number or HUD_DEFAULTS.number;

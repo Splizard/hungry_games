@@ -129,23 +129,14 @@ end);
 
 survival.register_state("hunger", {
     label = S("Hunger");
-    item = {
-        name = "survival_hunger:meter";
-        description = S("Hunger Meter");
-        inventory_image = "survival_hunger_meter.png";
-        recipe = {
-            { "", "default:wood", "" },
-            { "default:wood", "default:apple", "default:wood" },
-            { "", "default:wood", "" },
-        };
-    };
     hud = {
-        pos = {x=0.730, y=0.945};
-        image = "default_apple.png";
-        --image = "survival_hunger_hud.png";
+        pos = {x=0.5, y=0.9};
+        offset = {x=-175, y=-15};
+        image = "survival_hunger_hud_apple.png";
     };
-    get_default = function ( )
+    get_default = function ( hudidn )
         return {
+            hudid = hudidn;
             count = 0;
             flag = false;
         };
@@ -160,7 +151,7 @@ survival.register_state("hunger", {
     on_update = function ( dtime, player, state )
         local name = player:get_player_name();
         local privs = minetest.get_player_privs(name)
-        if privs.interact then
+		if privs.interact then
 		    state.count = state.count + dtime;
 		    if (state.flag and (state.count >= HUNGER_TIME)) then
 		        local hp = player:get_hp();
@@ -186,7 +177,7 @@ survival.register_state("hunger", {
 		            max_hear_distance = 16;
 		        });
 		    end
-		end
+	   end
     end;
 });
 

@@ -15,7 +15,7 @@ end
 local timer = 0;
 
 minetest.register_craftitem("survival_thirst:water_glass", {
-    description = "Glass of Water";
+    description = S("Glass of Water");
     inventory_image = "survival_thirst_water_glass.png";
     groups = { drink=1; survival_no_override=1; };
     stack_max = 10;
@@ -40,20 +40,45 @@ minetest.register_craftitem("survival_thirst:water_glass", {
 local alt_water_sources = {
     ["3dforniture:sink"] = true;
     ["homedecor:kitchen_cabinet_with_sink"] = true;
+	["default:water_source"] = true;
+	["default:water_flowing"] = true;
 };
 
-minetest.register_on_punchnode(function ( pos, node, puncher )
-    local item = puncher:get_wielded_item();
-    if ((item:get_name() == "vessels:drinking_glass")
-     and alt_water_sources[node.name]) then
-        local newitem = ItemStack("survival_thirst:water_glass 1");
-        local inv = puncher:get_inventory();
-        if (inv:room_for_item("main", newitem)) then
-            inv:remove_item("main", ItemStack(item:get_name().." 1"));
-            inv:add_item("main", newitem);
-        end
-    end
-end);
+minetest.register_craftitem(":vessels:drinking_glass", {
+	--Or use minetest.registered_items[vessels:drinking_glass] for all parametre.
+	description = S("Drinking Glass (empty)"),
+	drawtype = "plantlike",
+	tiles = {"vessels_drinking_glass.png"},
+	inventory_image = "vessels_drinking_glass_inv.png",
+	wield_image = "vessels_drinking_glass.png",
+	paramtype = "light",
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-0.25, -0.5, -0.25, 0.25, 0.4, 0.25}
+	},
+	groups = {vessel=1,dig_immediate=3,attached_node=1},
+	sounds = default.node_sound_glass_defaults(),
+	liquids_pointable = true,
+	on_use = function(itemstack, user, pointed_thing)
+		if pointed_thing.type ~= "node" then
+			return
+		end
+		local node = minetest.get_node(pointed_thing.under)
+		if alt_water_sources[node.name] then
+			local newitem = ItemStack("survival_thirst:water_glass 1");
+			local inv = user:get_inventory();
+			if (inv:room_for_item("main", newitem)) then
+				inv:add_item("main", newitem);
+				if not(minetest.registered_items[node.name].liquidtype=="none") then
+					minetest.remove_node(pointed_thing.under);
+				end
+				itemstack:take_item(); 
+				return itemstack
+			end
+		end	
+	end,
+})
 
 minetest.register_craft({
     output = "survival_thirst:water_glass";
@@ -119,23 +144,14 @@ end);
 
 survival.register_state("thirst", {
     label = S("Thirst");
-    item = {
-        name = "survival_thirst:meter";
-        description = S("Thirst Meter");
-        inventory_image = "survival_thirst_meter.png";
-        recipe = {
-            { "", "default:wood", "" },
-            { "default:wood", "vessels:drinking_glass", "default:wood" },
-            { "", "default:wood", "" },
-        };
-    };
     hud = {
-        pos = {x=0.720, y=0.965};
-        image = "survival_thirst_water_glass.png";
-        --image = "survival_thirst_hud.png";
+        pos = {x=0.5, y=0.9};
+        offset = {x=-10, y=-15};
+        image = "survival_thirst_hud_water_glass.png";
     };
-    get_default = function ( )
+    get_default = function ( hudidn )
         return {
+            hudid = hudidn;
             count = 0;
             thirsty = false;
         };
@@ -148,33 +164,40 @@ survival.register_state("thirst", {
         end
     end;
     on_update = function ( dtime, player, state )
-   		local name = player:get_player_name();
-    	local privs = minetest.get_player_privs(name)
-        if (player:get_hp() > 0) and privs.interact then
-            state.count = state.count + dtime;
-            local name = player:get_player_name();
-            if (state.thirsty and (state.count >= PASS_OUT_TIME)) then
-                state.count = 0;
-                state.thirsty = false;
-                if (player:get_hp() > 0) then
-                    minetest.chat_send_player(name, S("You died from dehydration."));
-                end
-                player:set_hp(0);
-                minetest.sound_play({ name="survival_thirst_pass_out" }, {
-                    pos = player:getpos();
-                    gain = 1.0;
-                    max_hear_distance = 16;
-                });
-            elseif ((not state.thirsty) and (state.count >= THIRST_TIME)) then
-                state.count = 0;
-                state.thirsty = true;
-                minetest.sound_play({ name="survival_thirst_thirst" }, {
-                    pos = player:getpos();
-                    gain = 1.0;
-                    max_hear_distance = 16;
-                });
-                minetest.chat_send_player(name, S("You are thirsty."));
-            end
+        if (player:get_hp() > 0) then
+       		local name = player:get_player_name();
+		    local privs = minetest.get_player_privs(name)
+	        if privs.interact then
+	        
+		        state.count = state.count + dtime;
+		        
+		        if (state.thirsty and (state.count >= PASS_OUT_TIME)) then
+		            state.count = 0;
+		            state.thirsty = false;
+		            if (player:get_hp() > 0) then
+		                minetest.chat_send_player(name, S("You died from dehydration."));
+		            end
+		            player:set_hp(0);
+		            minetest.sound_play({ name="survival_thirst_pass_out" }, {
+		                pos = player:getpos();
+		                gain = 1.0;
+		                max_hear_distance = 16;
+		            });
+		        elseif ((not state.thirsty) and (state.count >= THIRST_TIME)) then
+		            state.count = 0;
+		            state.thirsty = true;
+		            minetest.sound_play({ name="survival_thirst_thirst" }, {
+		                pos = player:getpos();
+		                gain = 1.0;
+		                max_hear_distance = 16;
+		            });
+		            minetest.chat_send_player(name, S("You are thirsty."));
+		        end
+		    end
         end
     end;
 });
+
+minetest.register_on_dieplayer(function ( player )
+    survival.reset_player_state(player:get_player_name(), "thirst");
+end);
