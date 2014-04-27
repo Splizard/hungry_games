@@ -1,5 +1,5 @@
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/armor.lua")
-local use_moreores = minetest.get_modpath("moreores")
+local use_moreores = true
 
 -- Regisiter Head Armor
 
@@ -165,10 +165,6 @@ local craft_ingreds = {
 	bronze = "default:bronze_ingot",
 	diamond = "default:diamond",
 }
-
-if use_moreores then
-	craft_ingreds.mithril = "moreores:mithril_ingot"
-end
 
 for k, v in pairs(craft_ingreds) do
 	minetest.register_craft({

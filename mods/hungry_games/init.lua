@@ -4,6 +4,8 @@
 	Feilds Marked with [SAFE] are safe to edit if you already have worlds generated.
 ]]--
 dofile(minetest.get_modpath("hungry_games").."/engine.lua")
+
+
 -----------------------------------
 --------Arena configuration--------
 
@@ -24,7 +26,8 @@ glass_arena.replace({
 	"default:cactus",
 	"default:leaves",
 	"default:tree",
-	"snow:snow"
+	"snow:snow",
+	"default:snow"
 }) 
 
 -----------------------------------
@@ -122,19 +125,28 @@ chest_item('snow:snowball', 10, 99, "odd")
 chest_item('3d_armor:helmet_wood', 10, 1, "helmet")
 chest_item('3d_armor:helmet_steel', 30, 1, "helmet")
 chest_item('3d_armor:helmet_bronze', 20, 1, "helmet")
+chest_item('3d_armor:helmet_diamond', 50, 1, "helmet")
+chest_item('3d_armor:helmet_mithril', 40, 1, "helmet")
 chest_item('3d_armor:chestplate_wood', 10, 1, "chestplate")
 chest_item('3d_armor:chestplate_steel', 30, 1, "chestplate")
 chest_item('3d_armor:chestplate_bronze', 20, 1, "chestplate")
+chest_item('3d_armor:chestplate_mithril', 40, 1, "chestplate")
+chest_item('3d_armor:chestplate_diamond', 50, 1, "chestplate")
 chest_item('3d_armor:leggings_wood', 10, 1, "leggings")
 chest_item('3d_armor:leggings_steel', 30, 1, "leggings")
 chest_item('3d_armor:leggings_bronze', 20, 1, "leggings")
-chest_item('3d_armor:shield_wood', 10, 1, "shield")
-chest_item('3d_armor:shield_steel', 30, 1, "shield")
-chest_item('3d_armor:shield_bronze', 20, 1, "shield")
-chest_item('more_armor:helmet_mithril', 40, 1, "helmet")
-chest_item('more_armor:chestplate_mithril', 40, 1, "chestplate")
-chest_item('more_armor:leggings_mithril', 40, 1, "leggings")
-chest_item('more_armor:shield_mithril', 40, 1, "shield")
+chest_item('3d_armor:leggings_mithril', 40, 1, "leggings")
+chest_item('3d_armor:leggings_diamond', 50, 1, "leggings")
+chest_item('3d_armor:boots_wood', 10, 1, "boots")
+chest_item('3d_armor:boots_steel', 30, 1, "boots")
+chest_item('3d_armor:boots_bronze', 20, 1, "boots")
+chest_item('3d_armor:boots_mithril', 40, 1, "boots")
+chest_item('3d_armor:boots_diamond', 50, 1, "boots")
+chest_item('shields:shield_wood', 10, 1, "shield")
+chest_item('shields:shield_steel', 30, 1, "shield")
+chest_item('shields:shield_bronze', 20, 1, "shield")
+chest_item('shields:shield_diamond', 50, 1, "shield")
+chest_item('shields:shield_mithril', 40, 1, "shield")
 --crafting items
 chest_item('default:stick', 8, 10)
 chest_item('default:steel_ingot', 15, 3)

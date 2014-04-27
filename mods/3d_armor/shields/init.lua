@@ -1,4 +1,4 @@
-local use_moreores = minetest.get_modpath("moreores")
+
 
 -- Regisiter Shields
 
@@ -30,14 +30,12 @@ minetest.register_tool("shields:shield_diamond", {
 	wear = 0,
 })
 
-if use_moreores then
-	minetest.register_tool("shields:shield_mithril", {
-		description = "Mithril Shield",
-		inventory_image = "shields_inv_shield_mithril.png",
-		groups = {armor_shield=15, armor_heal=12, armor_use=50},
-		wear = 0,
-	})
-end
+minetest.register_tool("shields:shield_mithril", {
+	description = "Mithril Shield",
+	inventory_image = "shields_inv_shield_mithril.png",
+	groups = {armor_shield=15, armor_heal=12, armor_use=50},
+	wear = 0,
+})
 
 local craft_ingreds = {
 	wood = "default:wood",
