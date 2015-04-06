@@ -31,7 +31,9 @@ After three minutes you get hungry and start starving.
 ATTENTION SERVER ADMINS:
 --------------------------
 When hosting a hungry games server please edit the hungry_games mod for configuring
-the game, this is the hungry_games/init.lua file. The file is meant to document itself but if you need help understanding the configuration just ask.
+the game, this is the minetest/games/hungry_games/mods/hungry_games/init.lua file. The file is meant to document itself but if you need help understanding the configuration just ask.
+
+** Linux users will find the games folder in /usr/share/minetest/**
 
 CHAT COMMANDS:
 ---------------
