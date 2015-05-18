@@ -3,6 +3,7 @@ local starting_game = false
 local ingame = false
 
 local registrants = {}
+local currGame = {}
 
 local end_grace = function()
 	if ingame then
@@ -26,56 +27,30 @@ local stop_game = function()
 		end)
 	end
 	registrants = {}
+	currGame = {}
 	ingame = false
 end
 
 local check_win = function()
 	if ingame then
-		local players = minetest.get_connected_players()
-		local winner = ""
-		local counter = table.getn(players)
-		for _,player in ipairs(players) do
-			local name = player:get_player_name()
-		   	local privs = minetest.get_player_privs(name)
-			if not privs.interact then
-				counter = counter - 1
-			elseif player:get_hp() < 1 then
-				counter = counter - 1
-			end
+		local count = 0
+		for _,_ in pairs(currGame) do
+			count = count + 1
 		end
-		if counter <= 1 then
-			for _,player in ipairs(players) do
-				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
-				if privs.interact and player:get_hp() > 0 then
-					local pos = player:getpos()
-					minetest.chat_send_player(name, "You Won!!")
-					winner = name
-					privs.fast = nil
-					privs.fly = nil
-					privs.interact = nil
-					minetest.set_player_privs(name, privs)
-					minetest.chat_send_player(name, "You are now spectating")
-					inv = player:get_inventory()
-					minetest.env:add_item(pos, player:get_wielded_item())
-					if inv then
-						inv:set_list("main", {})
-					end
-				end
+		if count <= 1 then
+			print(dump(currGame))
+			for playerName,_ in pairs(currGame) do
+				minetest.chat_send_player(playerName, "You Won!")
+				minetest.chat_send_all("The Hungry Games are now over, " .. playerName .. " was the winner")
 			end
-
+		
+			local players = minetest.get_connected_players()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
-			   	local privs = minetest.get_player_privs(name)
+				local privs = minetest.get_player_privs(name)
 				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
-			if winner ~= "" then
-				minetest.chat_send_all("The Hungry Games is now over! "..winner.." was the winner!")
-			else
-				minetest.chat_send_all("The Hungry Games is now over!  No survivors!")
-			end
-
 			stop_game()
 		end
 	end
@@ -102,6 +77,7 @@ end
 local start_game_now = function(contestants)
 	for i,player in ipairs(contestants) do
 		local name = player:get_player_name()
+		currGame[name] = true
 		local privs = minetest.get_player_privs(name)
 		privs.fast = nil
 		privs.fly = nil
@@ -206,6 +182,7 @@ end
 
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
+	currGame[player:get_player_name()] = nil
 	check_win()
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
@@ -256,6 +233,7 @@ end)
 
 minetest.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
+	currGame[name] = nil
    	local privs = minetest.get_player_privs(name)
 	if not privs.vote and votes > 0 then
 		votes = votes - 1
