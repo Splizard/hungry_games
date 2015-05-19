@@ -294,6 +294,7 @@ end)
 
 minetest.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
+	drop_player_items(player:get_player_name())
 	currGame[name] = nil
    	local privs = minetest.get_player_privs(name)
 	if not privs.vote and votes > 0 then
