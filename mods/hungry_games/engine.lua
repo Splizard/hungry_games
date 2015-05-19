@@ -12,6 +12,60 @@ local end_grace = function()
 	end
 end
 
+local drop_player_items = function(playerName, clear) --If clear != nil, don't drop items, just clear inventory
+	local player = minetest.get_player_by_name(playerName)
+	if not pos then pos = player:getpos() end
+	local inv = player:get_inventory()
+
+	if not clear then
+		--Drop main and craft inventories
+		local inventoryLists = {inv:get_list("main"), inv:get_list("craft")}
+		
+		for _,inventoryList in pairs(inventoryLists) do
+			for i,v in pairs(inventoryList) do
+				obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
+				if obj ~= nil then
+					obj:get_luaentity().collect = true
+					local x = math.random(1, 5)
+					if math.random(1,2) == 1 then
+						x = -x
+					end
+					local z = math.random(1, 5)
+					if math.random(1,2) == 1 then
+						z = -z
+					end
+					obj:setvelocity({x=1/x, y=obj:getvelocity().y, z=1/z})
+				end
+			end
+		end
+	end
+
+	inv:set_list("craft", {})
+	inv:set_list("main", {})
+
+	--Drop armor inventory
+	local armor_inv = minetest.get_inventory({type="detached", name=player:get_player_name().."_armor"})
+	local player_inv = player:get_inventory()
+	local pos = player:getpos()
+	local armorTypes = {"head", "torso", "legs", "feet", "shield"}
+	for i,stackName in ipairs(armorTypes) do
+		if not clear then
+			local stack = inv:get_stack("armor_" .. stackName, 1)
+			local x = math.random(0, 6)/3
+			local z = math.random(0, 6)/3
+			pos.x = pos.x + x
+			pos.z = pos.z + z
+			minetest.env:add_item(pos, stack)
+			pos.x = pos.x - x
+			pos.z = pos.z - z
+		end
+		armor_inv:set_stack("armor_"..stackName, 1, nil)
+		player_inv:set_stack("armor_"..stackName, 1, nil)
+	end
+	armor:set_player_armor(player)
+	return
+end
+
 local stop_game = function()
 	for _,player in ipairs(minetest.get_connected_players()) do
 		minetest.after(0.1, function()
@@ -40,8 +94,12 @@ local check_win = function()
 		if count <= 1 then
 			print(dump(currGame))
 			for playerName,_ in pairs(currGame) do
-				minetest.chat_send_player(playerName, "You Won!")
-				minetest.chat_send_all("The Hungry Games are now over, " .. playerName .. " was the winner")
+				winnerPos = minetest.get_player_by_name(playerName):getpos()
+				winnerName = playerName
+				
+				minetest.chat_send_player(winnerName, "You Won!")
+				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner")
+				minetest.sound_play("hungry_games_death")
 			end
 		
 			local players = minetest.get_connected_players()
@@ -51,7 +109,9 @@ local check_win = function()
 				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
+			
 			stop_game()
+			drop_player_items(winnerName, true)
 		end
 	end
 end
@@ -182,6 +242,7 @@ end
 
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
+	drop_player_items(player:get_player_name())
 	currGame[player:get_player_name()] = nil
 	check_win()
 	local name = player:get_player_name()
