@@ -35,7 +35,7 @@ glass_arena.replace({
 hungry_games = {}
 
 --Set countdown (in seconds) till players can leave their spawns.
-hungry_games.countdown = 10
+hungry_games.countdown = 60
 
 --Set grace period length in seconds (or 0 for no grace period)
 hungry_games.grace_period = 0
