@@ -43,6 +43,7 @@ survival.register_state = function ( name, def )
         def.enabled = true;
     end
     def.name = name;
+    hb.register_hudbar(name, 0xFFFFFF, def.label, {icon = def.hud.image, bar = def.hud.bar}, def.default_scaled_value, 100, false, "%s: %d%%")
     survival.registered_states[name] = def;
     survival.registered_states[#survival.registered_states + 1] = def;
 end
@@ -88,6 +89,7 @@ minetest.register_chatcommand("s", chat_cmd_def);
 
 local timer = 0;
 local MAX_TIMER = 0.5;
+local hudbar_active = {}
 
 minetest.register_globalstep(function ( dtime )
 
@@ -106,9 +108,9 @@ minetest.register_globalstep(function ( dtime )
                 if (def.on_update) then
                     def.on_update(tmr, player, state);
                 end
-                local value = (20 * def.get_scaled_value(state) / 100);
-                value = math.max(0, math.min(value, 20));
-                player:hud_change(player_states[plname][name].hudid, "number", value);
+                if hudbar_active[plname] then
+                    hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
+                end
             end
         end
     end
@@ -136,24 +138,14 @@ minetest.register_on_joinplayer(function ( player )
     minetest.after(0.5, function ( self )
         for i, def in ipairs(survival.registered_states) do
             local name = def.name;
-            player_states[plname][def.name].hudid = player:hud_add({
-                hud_elem_type = "statbar";
-                position = def.hud.pos or HUD_DEFAULTS.pos;
-                offset = def.hud.offset;
-                scale = def.hud.scale or HUD_DEFAULTS.scale;
-                text = def.hud.image or HUD_DEFAULTS.image;
-                number = def.hud.number or HUD_DEFAULTS.number;
-            });
-            --[[local pos = def.hud.pos or HUD_DEFAULTS.pos;
-            pos = {x=pos.x + 0.01, y=pos.y - 0.01};
-            player_states[plname][def.name].hudid_label = player:hud_add({
-                hud_elem_type = "text";
-                position = pos;
-                text = def.label;
-                number = 0xFFFFFF;
-            });]]
+            hb.init_hudbar(player, name, math.floor(def.get_scaled_value(player_states[plname][def.name])), 100, false);
+            hudbar_active[plname] = true;
         end
     end);
+end);
+
+minetest.register_on_leaveplayer(function ( player )
+   hudbar_active[player:get_player_name()] = false;
 end);
 
 local event_listeners = { };
