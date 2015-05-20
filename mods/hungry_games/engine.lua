@@ -9,6 +9,7 @@ local end_grace = function()
 	if ingame then
 		minetest.setting_set("enable_pvp", "true")
 		minetest.chat_send_all("Grace peroid over!")
+		minetest.sound_play("hungry_games_grace_over")
 	end
 end
 
@@ -99,7 +100,7 @@ local check_win = function()
 				
 				minetest.chat_send_player(winnerName, "You Won!")
 				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner")
-				minetest.sound_play("hungry_games_death")
+				minetest.sound_play("hungry_games_victory")
 			end
 		
 			local players = minetest.get_connected_players()
@@ -164,10 +165,10 @@ local start_game_now = function(contestants)
 		minetest.after(hungry_games.grace_period, end_grace)
 	end
 	minetest.setting_set("enable_damage", "true")
-	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
 	starting_game = false
+	minetest.sound_play("hungry_games_start")
 end
 
 local start_game = function()
@@ -175,6 +176,12 @@ local start_game = function()
 		return
 	end
 	starting_game = true
+	
+	if hungry_games.countdown > 8.336 then
+		minetest.after(hungry_games.countdown-8.336, function()
+			minetest.sound_play("hungry_games_prestart")
+		end)
+	end
 	print("filling chests...")
 	random_chests.refill()
 	local i = 1
@@ -211,7 +218,11 @@ local start_game = function()
 			minetest.after(i, function(list)
 				contestants = list[1]
 				i = list[2]
-				minetest.chat_send_all("Starting in "..dump(hungry_games.countdown-i))
+				local time_left = hungry_games.countdown-i
+				if time_left%4==0 and time_left >= 16 then
+					minetest.sound_play("hungry_games_starting_drum")
+				end
+				minetest.chat_send_all("Starting in "..dump(time_left))
 				for i,player in ipairs(contestants) do
 					minetest.after(0.1, function(table)
 						player = table[1]
