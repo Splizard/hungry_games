@@ -42,12 +42,12 @@ hungry_games.grace_period = 60
 
 --Set what happens when a player dies during a match.
 --Possible values are: "spectate" or "lobby"
-hungry_games.death_mode = "spectate"
+hungry_games.death_mode = "lobby"
 
 --Set what players can dig, should be modifyed along with glass_arena.replace
 -- (See Above Section)
 --Values "none" (can't dig), "restricted" (only dig with hand), "normal" (normal minetest). 
-hungry_games.dig_mode = "restricted"
+hungry_games.dig_mode = "none"
 
 -----------------------------------
 --------Spawn configuration--------
