@@ -15,6 +15,10 @@ end
 
 local drop_player_items = function(playerName, clear) --If clear != nil, don't drop items, just clear inventory
 	local player = minetest.get_player_by_name(playerName)
+	if not player then 
+		return
+	end
+	
 	if not pos then pos = player:getpos() end
 	local inv = player:get_inventory()
 
@@ -204,9 +208,6 @@ local start_game = function()
 				reset_player_state(player)
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
-				if privs.hg_admin then
-					minetest.chat_send_player(name, "Try setting some with the /hg set player_#")
-				end
 			end
 		end, {player, i})
 		if registrants[player:get_player_name()] then i = i + 1 end
