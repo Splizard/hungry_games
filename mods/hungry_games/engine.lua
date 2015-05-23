@@ -14,7 +14,12 @@ local end_grace = function()
 end
 
 local drop_player_items = function(playerName, clear) --If clear != nil, don't drop items, just clear inventory
+	if not playerName then
+		return
+	end
+
 	local player = minetest.get_player_by_name(playerName)
+	
 	if not player then 
 		return
 	end
