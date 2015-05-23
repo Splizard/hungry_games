@@ -203,6 +203,7 @@ local start_game = function()
 			registrants[player:get_player_name()] = true
 			diff = diff - 1
 		end
+		drop_player_items(player:get_player_name(), true)
 		minetest.after(0.1, function(list)
 			player = list[1]
 			i = list[2]
