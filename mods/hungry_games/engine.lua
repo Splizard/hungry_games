@@ -260,19 +260,31 @@ end
 
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
-	drop_player_items(player:get_player_name())
-	currGame[player:get_player_name()] = nil
+	local playerName = player:get_player_name()	
+	
+	local count = 0
+	for _,_ in pairs(currGame) do
+		count = count + 1
+	end
+	count = count - 1
+	
+	if ingame and currGame[playerName] and count ~= 1 then
+		minetest.chat_send_all(playerName .. " has died! Players left: " .. tostring(count))		
+	end	
+
+	drop_player_items(playerName)
+	currGame[playerName] = nil
 	check_win()
-	local name = player:get_player_name()
-   	local privs = minetest.get_player_privs(name)
-   	if privs.interact or privs.fly then
+
+   	local privs = minetest.get_player_privs(playerName)
+	if privs.interact or privs.fly then
    		if privs.interact and (hungry_games.death_mode == "spectate") then 
    			minetest.sound_play("hungry_games_death")
 		   	privs.fast = true
 			privs.fly = true
 			privs.interact = nil
-			minetest.set_player_privs(name, privs)
-			minetest.chat_send_player(name, "You are now spectating")
+			minetest.set_player_privs(playerName, privs)
+			minetest.chat_send_player(playerName, "You are now spectating")
 		end
    	end
 end)
