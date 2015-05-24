@@ -24,7 +24,7 @@ local drop_player_items = function(playerName, clear) --If clear != nil, don't d
 		return
 	end
 	
-	if not pos then pos = player:getpos() end
+	local pos = player:getpos()
 	local inv = player:get_inventory()
 
 	if not clear then
@@ -33,7 +33,7 @@ local drop_player_items = function(playerName, clear) --If clear != nil, don't d
 		
 		for _,inventoryList in pairs(inventoryLists) do
 			for i,v in pairs(inventoryList) do
-				obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
+				local obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
 				if obj ~= nil then
 					obj:get_luaentity().collect = true
 					local x = math.random(1, 5)
@@ -56,7 +56,6 @@ local drop_player_items = function(playerName, clear) --If clear != nil, don't d
 	--Drop armor inventory
 	local armor_inv = minetest.get_inventory({type="detached", name=player:get_player_name().."_armor"})
 	local player_inv = player:get_inventory()
-	local pos = player:getpos()
 	local armorTypes = {"head", "torso", "legs", "feet", "shield"}
 	for i,stackName in ipairs(armorTypes) do
 		if not clear then
@@ -102,9 +101,10 @@ local check_win = function()
 			count = count + 1
 		end
 		if count <= 1 then
+			local winnerName
 			print(dump(currGame))
 			for playerName,_ in pairs(currGame) do
-				winnerPos = minetest.get_player_by_name(playerName):getpos()
+				local winnerPos = minetest.get_player_by_name(playerName):getpos()
 				winnerName = playerName
 				
 				minetest.chat_send_player(winnerName, "You Won!")
