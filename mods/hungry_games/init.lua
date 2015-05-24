@@ -44,6 +44,12 @@ hungry_games.grace_period = 60
 --Possible values are: "spectate" or "lobby"
 hungry_games.death_mode = "lobby"
 
+--Percentage of players that must have voted (/vote) for the match to start (0 is 0%, 0.5 is 50%, 1 is 100%) must be <1 and >0
+hungry_games.vote_percent = 0.5
+
+--If the number of connected players is less than or equal to this, the vote to start must be unaimous
+hungry_games.vote_unanimous = 5
+
 --Set what players can dig, should be modifyed along with glass_arena.replace
 -- (See Above Section)
 --Values "none" (can't dig), "restricted" (only dig with hand), "normal" (normal minetest). 
