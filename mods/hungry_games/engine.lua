@@ -149,19 +149,21 @@ local start_game_now = function(contestants)
 		local name = player:get_player_name()
 		currGame[name] = true
 		local privs = minetest.get_player_privs(name)
-		privs.fast = nil
-		privs.fly = nil
-		privs.interact = true
-		privs.vote = nil
-		minetest.set_player_privs(name, privs)
-		minetest.after(0.1, function(table)
-			player = table[1]
-			i = table[2]
-			local name = player:get_player_name()
-			if spawning.is_spawn("player_"..i) then
-				spawning.spawn(player, "player_"..i)
-			end
-		end, {player, i})
+		if minetest.get_player_by_name(name) then	
+			privs.fast = nil
+			privs.fly = nil
+			privs.interact = true
+			privs.vote = nil
+			minetest.set_player_privs(name, privs)
+			minetest.after(0.1, function(table)
+				player = table[1]
+				i = table[2]
+				local name = player:get_player_name()
+				if spawning.is_spawn("player_"..i) then
+					spawning.spawn(player, "player_"..i)
+				end
+			end, {player, i})
+		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
 	if hungry_games.grace_period > 0 then
