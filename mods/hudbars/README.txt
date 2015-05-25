@@ -1,6 +1,6 @@
 Minetest mod: HUD bars
 ======================
-Version: 1.2.0
+Version: 1.2.1
 
 This software uses semantic versioning, as defined by version 2.0.0 of the SemVer
 standard. <http://semver.org/>

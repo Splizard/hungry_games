@@ -62,6 +62,9 @@ hb.settings.start_offset_right.y = hb.load_setting("hudbars_start_offset_right_y
 hb.settings.vmargin  = hb.load_setting("hudbars_tick", "number", 24)
 hb.settings.tick = hb.load_setting("hudbars_tick", "number", 0.1)
 
+-- experimental setting: Changing this setting is not officially supported, do NOT rely on it!
+hb.settings.forceload_default_hudbars = hb.load_setting("hudbars_forceload_default_hudbars", "bool", true)
+
 --[[
 - hudbars_alignment_pattern: This setting changes the way the HUD bars are ordered on the display. You can choose
   between a zig-zag pattern or a vertically stacked pattern.
@@ -131,6 +134,7 @@ function hb.get_hudbar_position_index(identifier)
 end
 
 function hb.register_hudbar(identifier, text_color, label, textures, default_start_value, default_start_max, default_start_hidden, format_string)
+	minetest.log("action", "hb.register_hudbar: "..tostring(identifier))
 	local hudtable = {}
 	local pos, offset
 	local index = math.floor(hb.get_hudbar_position_index(identifier))
@@ -404,7 +408,7 @@ function hb.get_hudbar_state(player, identifier)
 end
 
 --register built-in HUD bars
-if minetest.setting_getbool("enable_damage") then
+if minetest.setting_getbool("enable_damage") or hb.settings.forceload_default_hudbars then
 	hb.register_hudbar("health", 0xFFFFFF, "Health", { bar = "hudbars_bar_health.png", icon = "hudbars_icon_health.png", bgicon = "hudbars_bgicon_health.png" }, 20, 20, false)
 	hb.register_hudbar("breath", 0xFFFFFF, "Breath", { bar = "hudbars_bar_breath.png", icon = "hudbars_icon_breath.png" }, 10, 10, true)
 end
@@ -418,12 +422,18 @@ end
 
 
 local function custom_hud(player)
-	if minetest.setting_getbool("enable_damage") then
-		hb.init_hudbar(player, "health", player:get_hp())
+	if minetest.setting_getbool("enable_damage") or hb.settings.forceload_default_hudbars then
+		local hide
+		if minetest.setting_getbool("enable_damage") then
+			hide = false
+		else
+			hide = true
+		end
+		hb.init_hudbar(player, "health", player:get_hp(), nil, hide)
 		local breath = player:get_breath()
 		local hide_breath
 		if breath == 11 and hb.settings.autohide_breath == true then hide_breath = true else hide_breath = false end
-		hb.init_hudbar(player, "breath", math.min(breath, 10), nil, hide_breath)
+		hb.init_hudbar(player, "breath", math.min(breath, 10), nil, hide_breath or hide)
 	end
 end
 
@@ -431,6 +441,9 @@ end
 -- update built-in HUD bars
 local function update_hud(player)
 	if minetest.setting_getbool("enable_damage") then
+		if hb.settings.forceload_default_hudbars then
+			hb.unhide_hudbar(player, "health")
+		end
 		--air
 		local breath = player:get_breath()
 		
@@ -443,6 +456,9 @@ local function update_hud(player)
 		
 		--health
 		hb.change_hudbar(player, "health", player:get_hp())
+	elseif hb.settings.forceload_default_hudbars then
+		hb.hide_hudbar(player, "health")
+		hb.hide_hudbar(player, "breath")
 	end
 end
 
@@ -463,10 +479,10 @@ minetest.register_globalstep(function(dtime)
 	timer = timer + dtime
 	if main_timer > hb.settings.tick or timer > 4 then
 		if main_timer > hb.settings.tick then main_timer = 0 end
-		for playername, player in pairs(hb.players) do
-			-- only proceed if damage is enabled
-			if minetest.setting_getbool("enable_damage") then
-			-- update all hud elements
+		-- only proceed if damage is enabled
+		if minetest.setting_getbool("enable_damage") or hb.settings.forceload_default_hudbars then
+			for playername, player in pairs(hb.players) do
+				-- update all hud elements
 				update_hud(player)
 			end
 		end
