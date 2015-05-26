@@ -60,3 +60,7 @@ as of version 2.0.0 of the standard <http://semver.org/>.
 - New experimental/unfinished setting: hudbars_alignment_pattern: You can now make the HUD bars stack vertically instead of the current zig-zag pattern. Note you probably need to change source code to productively use this feature
 - Various position-related HUD bar settings (see README.txt)
 - Remove hudbars.conf support and hudbars.conf.example (was never officially supported anyways)
+
+1.2.1
+-----
+- Fix crash when enable_damage is changed in mid-game
