@@ -10,7 +10,7 @@ dofile(minetest.get_modpath("hungry_games").."/engine.lua")
 --------Arena configuration--------
 
 --Set size of the arena.
-glass_arena.set_size(200)
+glass_arena.set_size(400)
 
 --Set texture of the arena. [SAFE]
 glass_arena.set_texture("default_glass.png") 
@@ -35,19 +35,25 @@ glass_arena.replace({
 hungry_games = {}
 
 --Set countdown (in seconds) till players can leave their spawns.
-hungry_games.countdown = 60
+hungry_games.countdown = 10
 
 --Set grace period length in seconds (or 0 for no grace period)
-hungry_games.grace_period = 0
+hungry_games.grace_period = 60
 
 --Set what happens when a player dies during a match.
 --Possible values are: "spectate" or "lobby"
-hungry_games.death_mode = "spectate"
+hungry_games.death_mode = "lobby"
+
+--Percentage of players that must have voted (/vote) for the match to start (0 is 0%, 0.5 is 50%, 1 is 100%) must be <1 and >0
+hungry_games.vote_percent = 0.5
+
+--If the number of connected players is less than or equal to this, the vote to start must be unaimous
+hungry_games.vote_unanimous = 5
 
 --Set what players can dig, should be modifyed along with glass_arena.replace
 -- (See Above Section)
 --Values "none" (can't dig), "restricted" (only dig with hand), "normal" (normal minetest). 
-hungry_games.dig_mode = "restricted"
+hungry_games.dig_mode = "none"
 
 -----------------------------------
 --------Spawn configuration--------
@@ -100,28 +106,24 @@ random_chests.setrefill("database", 5)
 --been spawned then don't add any more of those group types to the chest.
 --items
 chest_item('default:apple', 4, 5)
-chest_item('default:ladder', 8, 5)
-chest_item('default:torch', 4, 6)
 chest_item('default:axe_wood', 10, 1, "axe")
 chest_item('default:axe_stone', 15, 1, "axe")
 chest_item('default:axe_steel', 20, 1, "axe")
-chest_item('throwing:arrow', 4, 10)
+chest_item('throwing:arrow', 4, 15)
 chest_item('throwing:arrow_fire', 12, 6)
 chest_item('throwing:bow_wood', 5, 1, "bow")
 chest_item('throwing:bow_stone', 10, 1, "bow")
 chest_item('throwing:bow_steel', 15, 1, "bow")
-chest_item('bucket:bucket_lava', 50, 1, "odd")
-chest_item('bucket:bucket_water', 40, 1)
 chest_item('default:sword_wood', 10, 1, "sword")
 chest_item('default:sword_stone', 15, 1, "sword")
 chest_item('default:sword_steel', 20, 1, "sword")
+chest_item('default:sword_diamond', 40, 1, "sword")
 chest_item('food:bread_slice', 3, 1)
 chest_item('food:bun', 5, 1)
 chest_item('food:bread', 10, 1)
 chest_item('food:apple_juice', 6, 2)
 chest_item('food:cactus_juice', 8, 2, "odd")
 chest_item('survival_thirst:water_glass', 4, 2)
-chest_item('snow:snowball', 10, 99, "odd")
 chest_item('3d_armor:helmet_wood', 10, 1, "helmet")
 chest_item('3d_armor:helmet_steel', 30, 1, "helmet")
 chest_item('3d_armor:helmet_bronze', 20, 1, "helmet")

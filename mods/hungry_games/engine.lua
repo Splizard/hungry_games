@@ -43,12 +43,22 @@ local end_grace = function()
 		minetest.chat_send_all("Grace peroid over!")
 		grace = false
 		unset_timer()
+		minetest.sound_play("hungry_games_grace_over")
 	end
 end
 
 local drop_player_items = function(playerName, clear) --If clear != nil, don't drop items, just clear inventory
+	if not playerName then
+		return
+	end
+
 	local player = minetest.get_player_by_name(playerName)
-	if not pos then pos = player:getpos() end
+	
+	if not player then 
+		return
+	end
+	
+	local pos = player:getpos()
 	local inv = player:get_inventory()
 
 	if not clear then
@@ -57,7 +67,7 @@ local drop_player_items = function(playerName, clear) --If clear != nil, don't d
 		
 		for _,inventoryList in pairs(inventoryLists) do
 			for i,v in pairs(inventoryList) do
-				obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
+				local obj = minetest.env:add_item({x=math.floor(pos.x)+math.random(), y=pos.y, z=math.floor(pos.z)+math.random()}, v)
 				if obj ~= nil then
 					obj:get_luaentity().collect = true
 					local x = math.random(1, 5)
@@ -80,7 +90,6 @@ local drop_player_items = function(playerName, clear) --If clear != nil, don't d
 	--Drop armor inventory
 	local armor_inv = minetest.get_inventory({type="detached", name=player:get_player_name().."_armor"})
 	local player_inv = player:get_inventory()
-	local pos = player:getpos()
 	local armorTypes = {"head", "torso", "legs", "feet", "shield"}
 	for i,stackName in ipairs(armorTypes) do
 		if not clear then
@@ -130,14 +139,15 @@ local check_win = function()
 			count = count + 1
 		end
 		if count <= 1 then
+			local winnerName
 			print(dump(currGame))
 			for playerName,_ in pairs(currGame) do
-				winnerPos = minetest.get_player_by_name(playerName):getpos()
+				local winnerPos = minetest.get_player_by_name(playerName):getpos()
 				winnerName = playerName
 				
 				minetest.chat_send_player(winnerName, "You Won!")
 				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner")
-				minetest.sound_play("hungry_games_death")
+				minetest.sound_play("hungry_games_victory")
 			end
 		
 			local players = minetest.get_connected_players()
@@ -199,19 +209,21 @@ local start_game_now = function(contestants)
 		local name = player:get_player_name()
 		currGame[name] = true
 		local privs = minetest.get_player_privs(name)
-		privs.fast = nil
-		privs.fly = nil
-		privs.interact = true
-		privs.vote = nil
-		minetest.set_player_privs(name, privs)
-		minetest.after(0.1, function(table)
-			player = table[1]
-			i = table[2]
-			local name = player:get_player_name()
-			if spawning.is_spawn("player_"..i) then
-				spawning.spawn(player, "player_"..i)
-			end
-		end, {player, i})
+		if minetest.get_player_by_name(name) then	
+			privs.fast = nil
+			privs.fly = nil
+			privs.interact = true
+			privs.vote = nil
+			minetest.set_player_privs(name, privs)
+			minetest.after(0.1, function(table)
+				player = table[1]
+				i = table[2]
+				local name = player:get_player_name()
+				if spawning.is_spawn("player_"..i) then
+					spawning.spawn(player, "player_"..i)
+				end
+			end, {player, i})
+		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
 	if hungry_games.grace_period > 0 then
@@ -229,11 +241,11 @@ local start_game_now = function(contestants)
 		unset_timer()
 	end
 	minetest.setting_set("enable_damage", "true")
-	minetest.sound_play("hungry_games_death")
 	votes = 0
 	ingame = true
 	countdown = false
 	starting_game = false
+	minetest.sound_play("hungry_games_start")
 end
 
 local start_game = function()
@@ -243,6 +255,12 @@ local start_game = function()
 	starting_game = true
 	grace = false
 	countdown = true
+	
+	if hungry_games.countdown > 8.336 then
+		minetest.after(hungry_games.countdown-8.336, function()
+			minetest.sound_play("hungry_games_prestart")
+		end)
+	end
 	print("filling chests...")
 	random_chests.refill()
 	local i = 1
@@ -256,6 +274,7 @@ local start_game = function()
 			diff = diff - 1
 		end
 		minetest.chat_send_all("Get ready to fight!")
+		drop_player_items(player:get_player_name(), true)
 		minetest.after(0.1, function(list)
 			player = list[1]
 			i = list[2]
@@ -266,9 +285,6 @@ local start_game = function()
 				reset_player_state(player)
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
-				if privs.hg_admin then
-					minetest.chat_send_player(name, "Try setting some with the /hg set player_#")
-				end
 			end
 		end, {player, i})
 		if registrants[player:get_player_name()] then i = i + 1 end
@@ -280,6 +296,10 @@ local start_game = function()
 			minetest.after(i, function(list)
 				contestants = list[1]
 				i = list[2]
+				local time_left = hungry_games.countdown-i
+				if time_left%4==0 and time_left >= 16 then
+					minetest.sound_play("hungry_games_starting_drum")
+				end
 				for i,player in ipairs(contestants) do
 					minetest.after(0.1, function(table)
 						player = table[1]
@@ -302,7 +322,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num > 1 and (votes >= num or (num > 5 and votes >= math.ceil(num*0.75))) then
+		if num > 1 and (votes >= num or (num > hungry_games.vote_unanimous and votes > num*hungry_games.vote_percent)) then
 			start_game()
 			return true
 		end
@@ -312,19 +332,31 @@ end
 
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
-	drop_player_items(player:get_player_name())
-	currGame[player:get_player_name()] = nil
+	local playerName = player:get_player_name()	
+	
+	local count = 0
+	for _,_ in pairs(currGame) do
+		count = count + 1
+	end
+	count = count - 1
+	
+	if ingame and currGame[playerName] and count ~= 1 then
+		minetest.chat_send_all(playerName .. " has died! Players left: " .. tostring(count))		
+	end	
+
+	drop_player_items(playerName)
+	currGame[playerName] = nil
 	check_win()
-	local name = player:get_player_name()
-   	local privs = minetest.get_player_privs(name)
-   	if privs.interact or privs.fly then
+
+   	local privs = minetest.get_player_privs(playerName)
+	if privs.interact or privs.fly then
    		if privs.interact and (hungry_games.death_mode == "spectate") then 
    			minetest.sound_play("hungry_games_death")
 		   	privs.fast = true
 			privs.fly = true
 			privs.interact = nil
-			minetest.set_player_privs(name, privs)
-			minetest.chat_send_player(name, "You are now spectating")
+			minetest.set_player_privs(playerName, privs)
+			minetest.chat_send_player(playerName, "You are now spectating")
 		end
    	end
 end)
@@ -468,7 +500,7 @@ minetest.register_chatcommand("vote", {
 			minetest.set_player_privs(name, privs)
 
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > 5 and math.ceil(num*0.75)) or num) )
+			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > hungry_games.vote_unanimous and num*hungry_games.vote_percent) or num) )
 
 			local cv = check_votes()
 			if votes > 1 and force_init_warning == false and cv == false then

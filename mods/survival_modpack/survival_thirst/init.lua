@@ -148,6 +148,7 @@ survival.register_state("thirst", {
         pos = {x=0.5, y=0.9};
         offset = {x=-10, y=-15};
         image = "survival_thirst_hud_water_glass.png";
+        bar = "survival_thirst_hud_bar.png";
     };
     get_default = function ( hudidn )
         return {
@@ -156,11 +157,12 @@ survival.register_state("thirst", {
             thirsty = false;
         };
     end;
+    default_scaled_value = 0;
     get_scaled_value = function ( state )
         if (state.thirsty) then
-            return 0;
+            return 100;
         else
-            return 100 * (THIRST_TIME - state.count) / THIRST_TIME;
+            return 100 - (100 * (THIRST_TIME - state.count) / THIRST_TIME);
         end
     end;
     on_update = function ( dtime, player, state )
