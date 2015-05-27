@@ -10,11 +10,39 @@ local currGame = {}
 
 local timer_hudids = {}
 
+local timer = nil
+local timer_updated = nil
+local timer_mode = nil	-- nil, "vote", "starting", "grace"
+
+local update_timer_hud = function(text)
+	local players = minetest.get_connected_players()
+	for i=1,#players do
+		local player = players[i]
+		local name = player:get_player_name()
+		if timer_hudids[name] ~= nil then
+			player:hud_change(timer_hudids[name], "text", text)
+		end
+	end
+end
+
+local set_timer = function(name, time)
+	timer_mode = name
+	timer = time
+	timer_updated = nil
+end
+
+local unset_timer = function()
+	timer_mode = nil
+	timer_updated = nil
+	update_timer_hud("")
+end
+
 local end_grace = function()
 	if ingame then
 		minetest.setting_set("enable_pvp", "true")
 		minetest.chat_send_all("Grace peroid over!")
 		grace = false
+		unset_timer()
 	end
 end
 
@@ -92,6 +120,7 @@ local stop_game = function()
 	grace = false
 	countdown = false
 	force_init_warning = false
+	unset_timer()
 end
 
 local check_win = function()
@@ -143,16 +172,27 @@ local reset_player_state = function(player)
 	survival.reset_player_state(name, "thirst")
 end
 
-local update_timer_hud = function(text)
-	local players = minetest.get_connected_players()
-	for i=1,#players do
-		local player = players[i]
-		local name = player:get_player_name()
-		if timer_hudids[name] ~= nil then
-			player:hud_change(timer_hudids[name], "text", text)
+minetest.register_globalstep(function(dtime)
+	if timer_mode ~= nil then
+		timer = timer - dtime
+		if timer_updated == nil or timer_updated - timer >= 1 then
+			timer_updated = timer
+			if timer >= 0 then
+				if timer_mode == "grace" then
+					update_timer_hud(string.format("Grace period: %ds", math.ceil(timer)))
+				elseif timer_mode == "vote" then
+					update_timer_hud(string.format("Next round in max. %ds.", math.ceil(timer)))
+				elseif timer_mode == "starting" then
+					update_timer_hud(string.format("Game starts in %ds.", math.ceil(timer)))
+				else
+					unset_timer()
+				end
+			else
+				unset_timer()
+			end
 		end
 	end
-end
+end)
 
 local start_game_now = function(contestants)
 	for i,player in ipairs(contestants) do
@@ -181,20 +221,12 @@ local start_game_now = function(contestants)
 			minetest.chat_send_all("You have "..dump(hungry_games.grace_period).."s until grace period ends!")
 		end
 		grace = true
+		set_timer("grace", hungry_games.grace_period)
 		minetest.setting_set("enable_pvp", "false")
 		minetest.after(hungry_games.grace_period, end_grace)
-		update_timer_hud(string.format("Grace period: %ds", hungry_games.grace_period))
-		for i=1, hungry_games.grace_period-1 do
-			minetest.after(i, function()
-				update_timer_hud(string.format("Grace period: %ds", hungry_games.grace_period-i))
-			end)
-		end
-		minetest.after(hungry_games.grace_period, function()
-			update_timer_hud("")
-		end)
 	else
-		update_timer_hud("")
 		grace = false
+		unset_timer()
 	end
 	minetest.setting_set("enable_damage", "true")
 	minetest.sound_play("hungry_games_death")
@@ -223,6 +255,7 @@ local start_game = function()
 			registrants[player:get_player_name()] = true
 			diff = diff - 1
 		end
+		minetest.chat_send_all("Get ready to fight!")
 		minetest.after(0.1, function(list)
 			player = list[1]
 			i = list[2]
@@ -242,14 +275,11 @@ local start_game = function()
 	end
 	minetest.setting_set("enable_damage", "false")
 	if hungry_games.countdown > 0 then
---		minetest.chat_send_all("Starting in "..dump(hungry_games.countdown))
-		update_timer_hud(string.format("Game starts in: %ds", hungry_games.countdown))
+		set_timer("starting", hungry_games.countdown)
 		for i=1, (hungry_games.countdown-1) do
 			minetest.after(i, function(list)
 				contestants = list[1]
 				i = list[2]
---				minetest.chat_send_all("Starting in "..dump(hungry_games.countdown-i))
-				update_timer_hud(string.format("Game starts in: %ds", hungry_games.countdown-i))
 				for i,player in ipairs(contestants) do
 					minetest.after(0.1, function(table)
 						player = table[1]
@@ -444,6 +474,7 @@ minetest.register_chatcommand("vote", {
 			if votes > 1 and force_init_warning == false and cv == false then
 				minetest.chat_send_all("The match will automatically be initiated in 5min.")
 				force_init_warning = true
+				set_timer("vote", 60*5)
 				minetest.after((60*5), function () 
 					if not (starting_game or ingame) then
 						start_game()
