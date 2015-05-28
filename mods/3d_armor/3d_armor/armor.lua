@@ -160,7 +160,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local name = player:get_player_name()
 	if fields.armor then
 		local formspec = armor.formspec:gsub("player_name", name)
-		inventory_plus.set_inventory_formspec(player, formspec)
 		return
 	end
 	for field, _ in pairs(fields) do
@@ -175,7 +174,6 @@ end)
 
 minetest.register_on_joinplayer(function(player)
 	default.player_set_model(player, "3d_armor_character.x")
-	inventory_plus.register_button(player,"armor", "Armor")
 	local player_inv = player:get_inventory()
 	local name = player:get_player_name()
 	local armor_inv = minetest.create_detached_inventory(name.."_armor",{

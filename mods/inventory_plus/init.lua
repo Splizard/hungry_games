@@ -16,7 +16,7 @@ inventory_plus = {}
 inventory_plus.buttons = {}
 
 -- default inventory page
-inventory_plus.default = minetest.setting_get("inventory_default") or "craft"
+inventory_plus.default = minetest.setting_get("inventory_default") or "main"
 
 -- register_button
 inventory_plus.register_button = function(player,name,label)
@@ -45,36 +45,18 @@ inventory_plus.get_formspec = function(player,page)
 	local f = {}
 	local fp = #f
 	fp = fp + 1
-	f[fp] = "size[8,7.5]"
+	f[fp] = "size[9,8.5]"
 	
 	-- player inventory
 	fp = fp + 1
-	f[fp] = "list[current_player;main;0,3.5;8,4;]"
+	f[fp] = "list[current_player;main;0.5,4.5;8,4;]"
 
-	-- craft page
-	if page=="craft" then
-		fp = fp + 1
-		f[fp] = "button[0,0;2,0.5;main;Back]"
-		fp = fp + 1
-		f[fp] = "list[current_player;craftpreview;7,1;1,1;]"
-		if minetest.setting_getbool("inventory_craft_small") then
-			fp = fp + 1
-			f[fp] = "list[current_player;craft;3,0;2,2;]"
-			player:get_inventory():set_width("craft", 2)
-			player:get_inventory():set_size("craft", 2*2)
-		else
-			fp = fp + 1
-			f[fp] = "list[current_player;craft;3,0;3,3;]"
-			player:get_inventory():set_width("craft", 3)
-			player:get_inventory():set_size("craft", 3*3)
-		end
-	end
-	
 	-- main page
 	if page=="main" then
+		local name = player:get_player_name()
 		-- buttons
 		local x,y=0,0
-		for k,v in pairs(inventory_plus.buttons[player:get_player_name()]) do
+		for k,v in pairs(inventory_plus.buttons[name]) do
 			fp = fp + 1
 			f[fp] = "button["..x..","..y..";2,0.5;"..k..";"..v.."]"
 			x=x+2
@@ -82,6 +64,33 @@ inventory_plus.get_formspec = function(player,page)
 				x=0
 				y=y+1
 			end
+		end
+
+		-- armor
+		fp = fp + 1
+		f[fp] = "list[detached:"..name.."_armor;armor_head;2,0;1,1;]"
+		fp = fp + 1
+		f[fp] = "list[detached:"..name.."_armor;armor_torso;2,1;1,1;]"
+		fp = fp + 1
+		f[fp] = "list[detached:"..name.."_armor;armor_legs;2,2;1,1;]"
+		fp = fp + 1
+		f[fp] = "list[detached:"..name.."_armor;armor_feet;2,3;1,1;]"
+		fp = fp + 1
+		f[fp] = "list[detached:"..name.."_armor;armor_shield;3,1;1,1;]"
+
+		-- crafting
+		fp = fp + 1
+		f[fp] = "list[current_player;craftpreview;8,1.5;1,1;]"
+		if minetest.setting_getbool("inventory_craft_small") then
+			fp = fp + 1
+			f[fp] = "list[current_player;craft;4.5,0.5;2,2;]"
+			player:get_inventory():set_width("craft", 2)
+			player:get_inventory():set_size("craft", 2*2)
+		else
+			fp = fp + 1
+			f[fp] = "list[current_player;craft;4.5,0.5;3,3;]"
+			player:get_inventory():set_width("craft", 3)
+			player:get_inventory():set_size("craft", 3*3)
 		end
 	end
 	
@@ -128,7 +137,6 @@ minetest.register_on_joinplayer(function(player)
 		player:get_inventory():set_width("craft", 3)
 		player:get_inventory():set_size("craft", 3*3)
 	end
-	inventory_plus.register_button(player,"craft","Craft")
 	local privs = minetest.get_player_privs(player:get_player_name())
 	minetest.after(1,function()
 		inventory_plus.set_inventory_formspec(player,inventory_plus.get_formspec(player, inventory_plus.default))
@@ -140,11 +148,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- main
 	if fields.main then
 		inventory_plus.set_inventory_formspec(player, inventory_plus.get_formspec(player,"main"))
-		return
-	end
-	-- craft
-	if fields.craft then
-		inventory_plus.set_inventory_formspec(player, inventory_plus.get_formspec(player,"craft"))
 		return
 	end
 end)
