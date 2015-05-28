@@ -59,10 +59,10 @@ inventory_plus.get_formspec = function(player,page)
 		for k,v in pairs(inventory_plus.buttons[name]) do
 			fp = fp + 1
 			f[fp] = "button["..x..","..y..";2,0.5;"..k..";"..v.."]"
-			x=x+2
-			if x == 8 then
-				x=0
-				y=y+1
+			y=y+0.8
+			if y >= 4 then
+				y=0
+				x=x+2
 			end
 		end
 
