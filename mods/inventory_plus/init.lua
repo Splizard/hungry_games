@@ -6,7 +6,8 @@ Copyright (c) 2012 cornernote, Brett O'Donnell <cornernote@gmail.com>
 Source Code: https://github.com/cornernote/minetest-particles
 License: GPLv3
 
-Texture files made by Jordach (CC-BY-SA 3.0).
+Cisun: Author of inventory_plus_armor_shield.png (WTPFL)
+Other texture files made by Jordach (CC-BY-SA 3.0).
 
 ]]--
 
@@ -108,15 +109,17 @@ inventory_plus.get_formspec = function(player,page)
 
 		-- armor
 		fp = fp + 1
-		f[fp] = "box[0.9,-0.1;3.1,4.1;#FFFFFF40]"
+		f[fp] = "box[-0.1,-0.1;4.1,4.1;#FFFFFF40]"
 		fp = fp + 1
-		f[fp] = "image[1,0;1,1;inventory_plus_armor_head.png]"
+		f[fp] = "image[0,0;1,1;inventory_plus_armor_head.png]"
 		fp = fp + 1
-		f[fp] = "image[1,1;1,1;inventory_plus_armor_torso.png]"
+		f[fp] = "image[0,1;1,1;inventory_plus_armor_torso.png]"
 		fp = fp + 1
-		f[fp] = "image[1,2;1,1;inventory_plus_armor_legs.png]"
+		f[fp] = "image[0,2;1,1;inventory_plus_armor_legs.png]"
 		fp = fp + 1
-		f[fp] = "image[1,3;1,1;inventory_plus_armor_feet.png]"
+		f[fp] = "image[0,3;1,1;inventory_plus_armor_feet.png]"
+		fp = fp + 1
+		f[fp] = "image[1,1;1,1;inventory_plus_armor_shield.png]"
 		fp = fp + 1
 		f[fp] = "list[detached:"..name.."_armor;armor_head;2,0;1,1;]"
 		fp = fp + 1
