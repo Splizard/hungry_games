@@ -73,7 +73,6 @@ inventory_plus.get_tabheader = function(player,tabidname)
 			tabheader = tabheader .. ","
 		end
 	end
-	minetest.log("error", tabid .. " " .. tabidname)
 	tabheader = tabheader .. ";"..tostring(tabid)..";false;true]"
 	return tabheader
 end
