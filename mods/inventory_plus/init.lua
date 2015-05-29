@@ -6,6 +6,8 @@ Copyright (c) 2012 cornernote, Brett O'Donnell <cornernote@gmail.com>
 Source Code: https://github.com/cornernote/minetest-particles
 License: GPLv3
 
+Texture files made by Jordach (CC-BY-SA 3.0).
+
 ]]--
 
 
@@ -46,8 +48,14 @@ inventory_plus.get_formspec = function(player,page)
 	local fp = #f
 	fp = fp + 1
 	f[fp] = "size[9,8.5]"
+	fp = fp + 1
+	f[fp] = default.inventory_background
+	fp = fp + 1
+	f[fp] = default.inventory_listcolors
 	
 	-- player inventory
+	fp = fp + 1
+	f[fp] = "box[0.3,4.3;8.2,4.2;#FFFFFF40]"
 	fp = fp + 1
 	f[fp] = "list[current_player;main;0.5,4.5;8,4;]"
 
@@ -65,8 +73,17 @@ inventory_plus.get_formspec = function(player,page)
 				x=x+2
 			end
 		end
-
 		-- armor
+		fp = fp + 1
+		f[fp] = "box[0.9,-0.1;3.1,4.1;#FFFFFF40]"
+		fp = fp + 1
+		f[fp] = "image[1,0;1,1;inventory_plus_armor_head.png]"
+		fp = fp + 1
+		f[fp] = "image[1,1;1,1;inventory_plus_armor_torso.png]"
+		fp = fp + 1
+		f[fp] = "image[1,2;1,1;inventory_plus_armor_legs.png]"
+		fp = fp + 1
+		f[fp] = "image[1,3;1,1;inventory_plus_armor_feet.png]"
 		fp = fp + 1
 		f[fp] = "list[detached:"..name.."_armor;armor_head;2,0;1,1;]"
 		fp = fp + 1
@@ -79,6 +96,8 @@ inventory_plus.get_formspec = function(player,page)
 		f[fp] = "list[detached:"..name.."_armor;armor_shield;3,1;1,1;]"
 
 		-- crafting
+		fp = fp + 1
+		f[fp] = "box[4.4,0.4;4.6,3.1;#FFFFFF40]"
 		fp = fp + 1
 		f[fp] = "list[current_player;craftpreview;8,1.5;1,1;]"
 		if minetest.setting_getbool("inventory_craft_small") then

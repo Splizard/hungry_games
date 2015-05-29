@@ -64,6 +64,8 @@ local get_formspec = function(player,start_i, pagenum)
 	local pagemax = math.floor((creative_inventory.creative_inventory_size-1) / (6*4) + 1)
 	return "size[13,7.5]"..
 			--"image[6,0.6;1,2;player.png]"..
+			default.inventory_background..
+			default.inventory_listcolors..
 			"button[0,0;2,0.5;main;Back]"..
 			"list[current_player;main;5,3.5;8,4;]"..
 			"list[current_player;craft;8,0;3,3;]"..

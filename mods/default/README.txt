@@ -179,3 +179,6 @@ Mito551 (sounds) (CC BY-SA):
   default_dirt_footstep.1.ogg
   default_dirt_footstep.2.ogg
   default_glass_footstep.ogg
+
+Unknown author (WTFPL):
+  default_inventory_background.png

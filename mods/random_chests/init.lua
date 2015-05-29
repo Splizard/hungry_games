@@ -174,10 +174,7 @@ function random_chests.setrefill(mode, interval)
 			local timer = minetest.env:get_node_timer(pos)
 			timer:start(interval)
 			local meta = minetest.env:get_meta(pos)
-			meta:set_string("formspec",
-					"size[8,9]"..
-					"list[current_name;main;0,0;8,4;]"..
-					"list[current_player;main;0,5;8,4;]")
+			meta:set_string("formspec", default.chest_formspec)
 			meta:set_string("infotext", "Chest")
 			local inv = meta:get_inventory()
 			inv:set_size("main", 8*4)
@@ -196,10 +193,7 @@ function random_chests.setrefill(mode, interval)
 			end
 			
 			local meta = minetest.env:get_meta(pos)
-			meta:set_string("formspec",
-					"size[8,9]"..
-					"list[current_name;main;0,0;8,4;]"..
-					"list[current_player;main;0,5;8,4;]")
+			meta:set_string("formspec", default.chest_formspec)
 			meta:set_string("infotext", "Chest")
 			local inv = meta:get_inventory()
 			inv:set_size("main", 8*4)
