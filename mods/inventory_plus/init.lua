@@ -7,6 +7,7 @@ Source Code: https://github.com/cornernote/minetest-particles
 License: GPLv3
 
 Cisun: Author of inventory_plus_armor_shield.png (WTPFL)
+Wuzzy: Author of inventory_plus_crafting_icon.png (WTFPL)
 Other texture files made by Jordach (CC-BY-SA 3.0).
 
 ]]--
@@ -94,9 +95,11 @@ inventory_plus.get_formspec = function(player,page)
 	
 	-- player inventory
 	fp = fp + 1
-	f[fp] = "box[0.3,4.3;8.2,4.2;#FFFFFF40]"
+	f[fp] = "box[0.3,4.2;8.2,4.5;#FFFFFF40]"
 	fp = fp + 1
-	f[fp] = "list[current_player;main;0.5,4.5;8,4;]"
+	f[fp] = "label[0.5,4.2;Inventory]"
+	fp = fp + 1
+	f[fp] = "list[current_player;main;0.5,4.7;8,4;]"
 
 	-- main page
 	if page=="main" then
@@ -110,6 +113,8 @@ inventory_plus.get_formspec = function(player,page)
 		-- armor
 		fp = fp + 1
 		f[fp] = "box[-0.1,-0.1;4.1,4.1;#FFFFFF40]"
+		fp = fp + 1
+		f[fp] = "label[0,-0.1;Armor]"
 		fp = fp + 1
 		f[fp] = "image[0,0;1,1;inventory_plus_armor_head.png]"
 		fp = fp + 1
@@ -133,7 +138,11 @@ inventory_plus.get_formspec = function(player,page)
 
 		-- crafting
 		fp = fp + 1
-		f[fp] = "box[4.4,0.4;4.6,3.1;#FFFFFF40]"
+		f[fp] = "box[4.4,0;4.6,3.5;#FFFFFF40]"
+		fp = fp + 1
+		f[fp] = "label[4.5,0;Crafting]"
+		fp = fp + 1
+		f[fp] = "image[7.5,1.5;0.5,1;inventory_plus_crafting_icon.png]"
 		fp = fp + 1
 		f[fp] = "list[current_player;craftpreview;8,1.5;1,1;]"
 		if minetest.setting_getbool("inventory_craft_small") then
