@@ -62,6 +62,9 @@ inventory_plus.get_tabheader = function(player,tabidname)
 	local tabheader = "tabheader[0,0;inventory_plus_tabs;"
 	local bord = inventory_plus.buttons_ordered[name]
 	local tabid
+	if bord == nil or #bord == 1 then
+		return ""
+	end
 	for i=1,#bord do
 		local bordi = bord[i]
 		if bordi == tabidname then
