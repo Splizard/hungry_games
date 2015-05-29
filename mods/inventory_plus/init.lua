@@ -16,6 +16,7 @@ inventory_plus = {}
 
 -- define buttons
 inventory_plus.buttons = {}
+inventory_plus.buttons_ordered = {}
 
 -- default inventory page
 inventory_plus.default = minetest.setting_get("inventory_default") or "main"
@@ -24,9 +25,23 @@ inventory_plus.default = minetest.setting_get("inventory_default") or "main"
 inventory_plus.register_button = function(player,name,label)
 	local player_name = player:get_player_name()
 	if inventory_plus.buttons[player_name] == nil then
-		inventory_plus.buttons[player_name] = {}
+		inventory_plus.buttons[player_name] = {["main"] = "Main"}
+	end
+	if inventory_plus.buttons_ordered[player_name] == nil then
+		inventory_plus.buttons_ordered[player_name] = {[1]="main"}
 	end
 	inventory_plus.buttons[player_name][name] = label
+	table.insert(inventory_plus.buttons_ordered[player_name], name)
+end
+
+inventory_plus.is_called = function(fields, compare_tabidname, player)
+	local player_name = player:get_player_name()
+	local input_id = tonumber(fields.inventory_plus_tabs)
+	if input_id ~= nil and inventory_plus.buttons_ordered[player_name][input_id] == compare_tabidname then
+		return true
+	else
+		return false
+	end
 end
 
 -- set_inventory_formspec
@@ -40,6 +55,27 @@ inventory_plus.set_inventory_formspec = function(player,formspec)
 	else
 		player:set_inventory_formspec(formspec)
 	end
+end
+
+inventory_plus.get_tabheader = function(player,tabidname)
+	local name = player:get_player_name()
+	local tabheader = "tabheader[0,0;inventory_plus_tabs;"
+	local bord = inventory_plus.buttons_ordered[name]
+	local tabid
+	for i=1,#bord do
+		local bordi = bord[i]
+		if bordi == tabidname then
+			tabid = i
+		end
+		local tabname = inventory_plus.buttons[name][bordi]
+		tabheader = tabheader .. tabname
+		if i~=#inventory_plus.buttons_ordered[name] then
+			tabheader = tabheader .. ","
+		end
+	end
+	minetest.log("error", tabid .. " " .. tabidname)
+	tabheader = tabheader .. ";"..tostring(tabid)..";false;true]"
+	return tabheader
 end
 
 -- get_formspec
@@ -61,18 +97,13 @@ inventory_plus.get_formspec = function(player,page)
 
 	-- main page
 	if page=="main" then
+
 		local name = player:get_player_name()
-		-- buttons
-		local x,y=0,0
-		for k,v in pairs(inventory_plus.buttons[name]) do
-			fp = fp + 1
-			f[fp] = "button["..x..","..y..";2,0.5;"..k..";"..v.."]"
-			y=y+0.8
-			if y >= 4 then
-				y=0
-				x=x+2
-			end
-		end
+		-- tabs
+		local tabheader = inventory_plus.get_tabheader(player,page)
+		fp = fp + 1
+		f[fp] = tabheader
+
 		-- armor
 		fp = fp + 1
 		f[fp] = "box[0.9,-0.1;3.1,4.1;#FFFFFF40]"
@@ -165,9 +196,8 @@ end)
 -- register_on_player_receive_fields
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- main
-	if fields.main then
+	if inventory_plus.is_called(fields, "main", player) then
 		inventory_plus.set_inventory_formspec(player, inventory_plus.get_formspec(player,"main"))
-		return
 	end
 end)
 
