@@ -24,7 +24,8 @@ minetest.register_craftitem("survival_thirst:water_glass", {
         state.count = 0;
         state.thirsty = false;
         minetest.sound_play({ name="survival_thirst_drink" }, {
-            to_player = user:getpos();
+            pos = user:getpos();
+            max_hear_distance = 16;
             gain = 1.0;
         });
         local inv = user:get_inventory();
@@ -108,7 +109,8 @@ local function override_on_use ( def )
     def.on_use = function ( itemstack, user, pointed_thing )
         local state = survival.get_player_state(user:get_player_name(), "thirst");
         minetest.sound_play({ name="survival_thirst_drink" }, {
-            to_player = user:getpos();
+            pos = user:getpos();
+            max_hear_distance = 16;
             gain = 1.0;
         });
         if (on_use) then
