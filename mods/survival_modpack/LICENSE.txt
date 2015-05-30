@@ -1,6 +1,8 @@
+Unless otherwise noted, all code files fall under the BSD 2 clause license.
 
-Unless otherwise noted, all code files fall under the BSD 2 clause license
-reproduced below:
+The media files fall under the WTFPL, with one exception:
+survival_thirst_drink.ogg, it falls under CC-BY and is authored by aent.
+
 
 --- START OF BSD LICENSE ---
 
