@@ -2,6 +2,7 @@ Unless otherwise noted, all code files fall under the BSD 2 clause license.
 
 The media files fall under the WTFPL, with one exception:
 survival_thirst_drink.ogg, it falls under CC-BY and is authored by aent.
+survival_thirst_thirst.ogg falls under WTFPL and is made by ecfike.
 
 
 --- START OF BSD LICENSE ---
