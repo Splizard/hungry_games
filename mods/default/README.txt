@@ -179,3 +179,13 @@ Mito551 (sounds) (CC BY-SA):
   default_dirt_footstep.1.ogg
   default_dirt_footstep.2.ogg
   default_glass_footstep.ogg
+
+Independent.nu (sounds) (WTFPL):
+  player_damage.1.ogg
+  player_damage.2.ogg
+  player_damage.3.ogg
+  player_damage.4.ogg
+
+hintriger (sounds) (WTFPL):
+  player_falling_damage.1.ogg
+  player_falling_damage.2.ogg
