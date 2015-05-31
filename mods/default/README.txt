@@ -182,3 +182,13 @@ Mito551 (sounds) (CC BY-SA):
 
 Unknown author (WTFPL):
   default_inventory_background.png
+
+Independent.nu (sounds) (WTFPL):
+  player_damage.1.ogg
+  player_damage.2.ogg
+  player_damage.3.ogg
+  player_damage.4.ogg
+
+hintriger (sounds) (WTFPL):
+  player_falling_damage.1.ogg
+  player_falling_damage.2.ogg

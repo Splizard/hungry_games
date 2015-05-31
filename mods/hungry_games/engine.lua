@@ -333,6 +333,7 @@ end
 --Check if theres only one player left and stop hungry games.
 minetest.register_on_dieplayer(function(player)
 	local playerName = player:get_player_name()	
+	local pos = player:getpos()
 	
 	local count = 0
 	for _,_ in pairs(currGame) do
@@ -349,9 +350,11 @@ minetest.register_on_dieplayer(function(player)
 	check_win()
 
    	local privs = minetest.get_player_privs(playerName)
+	if privs.interact then
+		minetest.sound_play("hungry_games_death", {pos = pos})
+	end
 	if privs.interact or privs.fly then
    		if privs.interact and (hungry_games.death_mode == "spectate") then 
-   			minetest.sound_play("hungry_games_death")
 		   	privs.fast = true
 			privs.fly = true
 			privs.interact = nil
