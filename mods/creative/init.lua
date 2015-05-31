@@ -64,7 +64,9 @@ local get_formspec = function(player,start_i, pagenum)
 	local pagemax = math.floor((creative_inventory.creative_inventory_size-1) / (6*4) + 1)
 	return "size[13,7.5]"..
 			--"image[6,0.6;1,2;player.png]"..
-			"button[0,0;2,0.5;main;Back]"..
+			default.inventory_background..
+			default.inventory_listcolors..
+			inventory_plus.get_tabheader(player, "hgmaker")..
 			"list[current_player;main;5,3.5;8,4;]"..
 			"list[current_player;craft;8,0;3,3;]"..
 			"list[current_player;craftpreview;12,1;1,1;]"..
@@ -114,7 +116,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		setformspec()
 	end
 	
-	if fields.hgmaker then
+	if inventory_plus.is_called(fields, "hgmaker", player) then
 		setformspec()
 	end
 	

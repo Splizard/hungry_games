@@ -661,6 +661,8 @@ minetest.register_node("default:sign_wall", {
 
 default.chest_formspec = 
 	"size[8,9]"..
+	default.inventory_background..
+	default.inventory_listcolors..
 	"list[current_name;main;0,0;8,4;]"..
 	"list[current_player;main;0,5;8,4;]"
 
@@ -803,6 +805,8 @@ minetest.register_node("default:chest_locked", {
 function default.get_furnace_active_formspec(pos, percent)
 	local formspec =
 		"size[8,9]"..
+		default.inventory_background..
+		default.inventory_listcolors..
 		"image[2,2;1,1;default_furnace_fire_bg.png^[lowpart:"..
 		(100-percent)..":default_furnace_fire_fg.png]"..
 		"list[current_name;fuel;2,3;1,1;]"..
@@ -814,6 +818,8 @@ end
 
 default.furnace_inactive_formspec =
 	"size[8,9]"..
+	default.inventory_background..
+	default.inventory_listcolors..
 	"image[2,2;1,1;default_furnace_fire_bg.png]"..
 	"list[current_name;fuel;2,3;1,1;]"..
 	"list[current_name;src;2,1;1,1;]"..

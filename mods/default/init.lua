@@ -11,6 +11,9 @@ LIGHT_MAX = 14
 -- Definitions made by this mod that other mods can use too
 default = {}
 
+default.inventory_background = "background[0,0;9,8;default_inventory_background.png;true]"
+default.inventory_listcolors = "listcolors[#8E6C3C;#EEAF6B;#683E12;#CA7700;#FFFFFF]"
+
 -- Load files
 dofile(minetest.get_modpath("default").."/functions.lua")
 dofile(minetest.get_modpath("default").."/nodes.lua")
