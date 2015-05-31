@@ -92,7 +92,8 @@ local function override_on_use ( def )
                 soundname = "survival_hunger_eat";
             end
             minetest.sound_play({ name=soundname }, {
-                to_player = user:getpos();
+                pos = user:getpos();
+                max_hear_distance = 16;
                 gain = 1.0;
             });
             if (on_use) then
