@@ -17,7 +17,7 @@ function glass_arena.set_texture(name)
 		inventory_image = minetest.inventorycube("default_glass.png"),
 		paramtype = "light",
 		sunlight_propagates = true,
-		is_ground_content = true,
+		is_ground_content = false,
 		diggable = false,
 		groups = {not_in_creative_inventory=1},
 	})
@@ -31,7 +31,7 @@ minetest.register_node("glass_arena:wall",{
 	inventory_image = minetest.inventorycube("default_glass.png"),
 	paramtype = "light",
 	sunlight_propagates = true,
-	is_ground_content = true,
+	is_ground_content = false,
 	diggable = false,
 	groups = {not_in_creative_inventory=1},
 })
@@ -42,7 +42,7 @@ minetest.register_node("glass_arena:wall_middle",{
 	inventory_image = minetest.inventorycube("default_glass.png"),
 	paramtype = "light",
 	sunlight_propagates = true,
-	is_ground_content = true,
+	is_ground_content = false,
 	diggable = false,
 	groups = {not_in_creative_inventory=1},
 })
@@ -53,7 +53,7 @@ minetest.register_node("glass_arena:wall_end",{
 	inventory_image = minetest.inventorycube("default_glass.png"),
 	paramtype = "light",
 	sunlight_propagates = true,
-	is_ground_content = true,
+	is_ground_content = false,
 	diggable = false,
 	groups = {not_in_creative_inventory=1},
 })
