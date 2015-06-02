@@ -141,6 +141,8 @@ end
 -- Update appearance when the player joins
 minetest.register_on_joinplayer(function(player)
 	default.player_set_model(player, "character.x")
+	player:hud_set_hotbar_image("gui_hotbar.png")
+	player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
 end)
 
 minetest.register_on_leaveplayer(function(player)
