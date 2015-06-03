@@ -192,3 +192,8 @@ Independent.nu (sounds) (WTFPL):
 hintriger (sounds) (WTFPL):
   player_falling_damage.1.ogg
   player_falling_damage.2.ogg
+
+Wuzzy and others (WTFPL)
+  crosshair.png
+  gui_hudbar.png
+  gui_hudbar_selected.png
