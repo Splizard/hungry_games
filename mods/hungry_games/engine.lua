@@ -470,7 +470,7 @@ minetest.register_chatcommand("hg", {
 				return
 			end
 		elseif parms[1] == "set" then
-			if parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d") then
+			if parms[2] ~= nil and (parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d")) then
 				local pos = {}
 				if parms[3] and parms[4] and parms[5] then
 					pos = {x=parms[3],y=parms[4],z=parms[5]}
