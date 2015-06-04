@@ -8,6 +8,8 @@ local countdown = false
 local registrants = {}
 local currGame = {}
 
+local spots_shuffled = {}
+
 local timer_hudids = {}
 
 local timer = nil
@@ -216,13 +218,13 @@ local start_game_now = function(contestants)
 			privs.vote = nil
 			minetest.set_player_privs(name, privs)
 			minetest.after(0.1, function(table)
-				player = table[1]
-				i = table[2]
+				local player = table[1]
+				local i = table[2]
 				local name = player:get_player_name()
 				if spawning.is_spawn("player_"..i) then
 					spawning.spawn(player, "player_"..i)
 				end
-			end, {player, i})
+			end, {player, spots_shuffled[i]})
 		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
@@ -256,6 +258,7 @@ local start_game = function()
 	grace = false
 	countdown = true
 	
+	local i = 1
 	if hungry_games.countdown > 8.336 then
 		minetest.after(hungry_games.countdown-8.336, function()
 			minetest.sound_play("hungry_games_prestart")
@@ -263,30 +266,57 @@ local start_game = function()
 	end
 	print("filling chests...")
 	random_chests.refill()
-	local i = 1
 	--Find out how many spots there are to spawn
-	local spots = get_spots()
-	local diff =  spots-table.getn(registrants)
+	local nspots = get_spots()
+	local diff =  nspots-table.getn(registrants)
 	local contestants = {}
-	for _,player in pairs(minetest.get_connected_players() ) do
+
+	-- Shuffle players
+	local players = minetest.get_connected_players()
+	local players_shuffled = {}
+	local shuffle_free = {}
+	for j=1,#players do
+		shuffle_free[j] = j
+	end
+	for j=1,#players do
+		local rnd = math.random(1, #shuffle_free)
+		players_shuffled[j] = players[shuffle_free[rnd]]
+		table.remove(shuffle_free, rnd)
+	end
+
+	-- Shuffle spots as well
+	shuffle_free = {}
+	spots_shuffled = {}
+	for j=1,nspots do
+		shuffle_free[j] = j
+	end
+	for j=1,nspots do
+		local rnd = math.random(1, #shuffle_free)
+		spots_shuffled[j] = shuffle_free[rnd]
+		table.remove(shuffle_free, rnd)
+	end
+
+	-- Spawn players
+	for p=1,#players_shuffled  do
+		local player = players_shuffled[p]
 		if diff > 0 then
 			registrants[player:get_player_name()] = true
 			diff = diff - 1
 		end
 		drop_player_items(player:get_player_name(), true)
 		minetest.after(0.1, function(list)
-			player = list[1]
-			i = list[2]
+			local player = list[1]
+			local spawn_id = list[2]
 			local name = player:get_player_name()
-			if registrants[name] == true and spawning.is_spawn("player_"..i) then
+			if registrants[name] == true and spawn_id ~= nil and spawning.is_spawn("player_"..spawn_id) then
 				table.insert(contestants, player)
-				spawning.spawn(player, "player_"..i)
+				spawning.spawn(player, "player_"..spawn_id)
 				reset_player_state(player)
 				minetest.chat_send_player(name, "Get ready to fight!")
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
 			end
-		end, {player, i})
+		end, {player, spots_shuffled[i]})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
 	minetest.setting_set("enable_damage", "false")
@@ -294,21 +324,21 @@ local start_game = function()
 		set_timer("starting", hungry_games.countdown)
 		for i=1, (hungry_games.countdown-1) do
 			minetest.after(i, function(list)
-				contestants = list[1]
-				i = list[2]
+				local contestants = list[1]
+				local i = list[2]
 				local time_left = hungry_games.countdown-i
 				if time_left%4==0 and time_left >= 16 then
 					minetest.sound_play("hungry_games_starting_drum")
 				end
 				for i,player in ipairs(contestants) do
 					minetest.after(0.1, function(table)
-						player = table[1]
-						i = table[2]
+						local player = table[1]
+						local i = table[2]
 						local name = player:get_player_name()
 						if spawning.is_spawn("player_"..i) then
 							spawning.spawn(player, "player_"..i)
 						end
-					end, {player, i})
+					end, {player, spots_shuffled[i]})
 				end
 			end, {contestants,i})
 		end
