@@ -211,7 +211,7 @@ local start_game_now = function(input)
 	local contestants = input[1]
 	local gsn = input[2]
 	if gsn ~= gameSequenceNumber or not starting_game then
-		return
+		return false
 	end
 	for i,player in ipairs(contestants) do
 		local name = player:get_player_name()
@@ -258,6 +258,7 @@ local start_game_now = function(input)
 	countdown = false
 	starting_game = false
 	minetest.sound_play("hungry_games_start")
+	return true
 end
 
 local start_game = function()
@@ -453,8 +454,8 @@ minetest.register_privilege("register", "Privilege to register.")
 
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
-	params = "start | stop | build | set player_<n> | lobby | spawn",
-	description = "Manage Hungry Games. start: Start/restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players.",
+	params = "start | restart | stop | build | set player_<n> | lobby | spawn",
+	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players.",
 	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
@@ -472,13 +473,34 @@ minetest.register_chatcommand("hg", {
 				break
 			end
 		until false
+		local ret
 		--Restarts/Starts game.
-		if parms[1] == "restart" or parms[1] == 'r' or parms[1] == "start" then
-			start_game()
+		if parms[1] == "start" then
+			local nostart
+			if starting_game or ingame then
+				nostart = true
+			end
+			ret = start_game()
+			if ret == false or nostart then
+				minetest.chat_send_player(name, "There is already a game running!")
+			end
+		elseif parms[1] == "restart" or parms[1] == 'r' then
+			if starting_game or ingame then
+				stop_game()
+			end
+			ret = start_game()
+			if ret == false then
+				minetest.chat_send_player(name, "The game could not be restarted.")
+			end
+
 		--Stops Game.
 		elseif parms[1] == "stop" then
-			stop_game()
-			minetest.chat_send_all("The Hunger Games has been stopped!")
+			if starting_game or ingame then
+				stop_game()
+				minetest.chat_send_all("The Hunger Games have been stopped!")
+			else
+				minetest.chat_send_player(name, "The game has already been stopped.")
+			end
 		elseif parms[1] == "build" then
 			if not ingame then
 				local privs = minetest.get_player_privs(name)
