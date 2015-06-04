@@ -430,8 +430,8 @@ minetest.register_privilege("register", "Privilege to register.")
 
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
-	params = "<command>",
-	description = "Manage hungry_games",
+	params = "start | stop | build | set player_<n> | lobby | spawn",
+	description = "Manage Hungry Games. start: Start/restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players.",
 	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
