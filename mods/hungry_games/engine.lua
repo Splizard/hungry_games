@@ -272,7 +272,7 @@ local start_game = function()
 	
 	if hungry_games.countdown > 8.336 then
 		minetest.after(hungry_games.countdown-8.336, function(gsn)
-			if gsn == gameSequenceNumber then
+			if gsn == gameSequenceNumber and starting_game then
 				minetest.sound_play("hungry_games_prestart")
 			end
 		end, gameSequenceNumber)
