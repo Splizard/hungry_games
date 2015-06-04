@@ -483,6 +483,8 @@ minetest.register_chatcommand("hg", {
 			else
 				minetest.chat_send_player(name, "Set what?")
 			end
+		else
+			minetest.chat_send_player(name, "Unknown subcommand! Use /help hg for a list of available subcommands.")
 		end
 	end,
 })
