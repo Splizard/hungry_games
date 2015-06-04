@@ -7,6 +7,8 @@ local countdown = false
 
 local registrants = {}
 local currGame = {}
+local gameSequenceNumber = 0	--[[ Sequence number of current round, will be incremented each round.
+				     Used to determine whether minetest.after calls are still valid or should be discarded. ]]
 
 local timer_hudids = {}
 
@@ -37,8 +39,8 @@ local unset_timer = function()
 	update_timer_hud("")
 end
 
-local end_grace = function()
-	if ingame then
+local end_grace = function(gsn)
+	if ingame and gsn == gameSequenceNumber then
 		minetest.setting_set("enable_pvp", "true")
 		minetest.chat_send_all("Grace peroid over!")
 		grace = false
@@ -128,6 +130,7 @@ local stop_game = function()
 	ingame = false
 	grace = false
 	countdown = false
+	starting_game = false
 	force_init_warning = false
 	unset_timer()
 end
@@ -204,7 +207,12 @@ minetest.register_globalstep(function(dtime)
 	end
 end)
 
-local start_game_now = function(contestants)
+local start_game_now = function(input)
+	local contestants = input[1]
+	local gsn = input[2]
+	if gsn ~= gameSequenceNumber or not starting_game then
+		return
+	end
 	for i,player in ipairs(contestants) do
 		local name = player:get_player_name()
 		currGame[name] = true
@@ -216,13 +224,17 @@ local start_game_now = function(contestants)
 			privs.vote = nil
 			minetest.set_player_privs(name, privs)
 			minetest.after(0.1, function(table)
-				player = table[1]
-				i = table[2]
+				local player = table[1]
+				local i = table[2]
+				local gsn = table[3]
+				if gsn ~= gameSequenceNumber then
+					return
+				end
 				local name = player:get_player_name()
 				if spawning.is_spawn("player_"..i) then
 					spawning.spawn(player, "player_"..i)
 				end
-			end, {player, i})
+			end, {player, i, gameSequenceNumber})
 		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
@@ -235,7 +247,7 @@ local start_game_now = function(contestants)
 		grace = true
 		set_timer("grace", hungry_games.grace_period)
 		minetest.setting_set("enable_pvp", "false")
-		minetest.after(hungry_games.grace_period, end_grace)
+		minetest.after(hungry_games.grace_period, end_grace, gameSequenceNumber)
 	else
 		grace = false
 		unset_timer()
@@ -252,14 +264,17 @@ local start_game = function()
 	if starting_game then
 		return
 	end
+	gameSequenceNumber = gameSequenceNumber + 1
 	starting_game = true
 	grace = false
 	countdown = true
 	
 	if hungry_games.countdown > 8.336 then
-		minetest.after(hungry_games.countdown-8.336, function()
-			minetest.sound_play("hungry_games_prestart")
-		end)
+		minetest.after(hungry_games.countdown-8.336, function(gsn)
+			if gsn == gameSequenceNumber then
+				minetest.sound_play("hungry_games_prestart")
+			end
+		end, gameSequenceNumber)
 	end
 	print("filling chests...")
 	random_chests.refill()
@@ -275,8 +290,12 @@ local start_game = function()
 		end
 		drop_player_items(player:get_player_name(), true)
 		minetest.after(0.1, function(list)
-			player = list[1]
-			i = list[2]
+			local player = list[1]
+			local i = list[2]
+			local gsn = list[3]
+			if gsn ~= gameSequenceNumber or not starting_game then
+				return
+			end
 			local name = player:get_player_name()
 			if registrants[name] == true and spawning.is_spawn("player_"..i) then
 				table.insert(contestants, player)
@@ -286,7 +305,7 @@ local start_game = function()
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
 			end
-		end, {player, i})
+		end, {player, i, gameSequenceNumber})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
 	minetest.setting_set("enable_damage", "false")
@@ -294,8 +313,12 @@ local start_game = function()
 		set_timer("starting", hungry_games.countdown)
 		for i=1, (hungry_games.countdown-1) do
 			minetest.after(i, function(list)
-				contestants = list[1]
-				i = list[2]
+				local contestants = list[1]
+				local i = list[2]
+				local gsn = list[3]
+				if gsn ~= gameSequenceNumber or not starting_game then
+					return
+				end
 				local time_left = hungry_games.countdown-i
 				if time_left%4==0 and time_left >= 16 then
 					minetest.sound_play("hungry_games_starting_drum")
@@ -310,11 +333,11 @@ local start_game = function()
 						end
 					end, {player, i})
 				end
-			end, {contestants,i})
+			end, {contestants,i,gameSequenceNumber})
 		end
-		minetest.after(hungry_games.countdown, start_game_now, contestants)
+		minetest.after(hungry_games.countdown, start_game_now, {contestants,gameSequenceNumber})
 	else
-		start_game_now(contestants)
+		start_game_now({contestants,gameSequenceNumber})
 	end
 end
 
@@ -512,11 +535,11 @@ minetest.register_chatcommand("vote", {
 				minetest.chat_send_all("The match will automatically be initiated in 5min.")
 				force_init_warning = true
 				set_timer("vote", 60*5)
-				minetest.after((60*5), function () 
-					if not (starting_game or ingame) then
+				minetest.after((60*5), function (gsn)
+					if not (starting_game or ingame) and gsn == gameSequenceNumber then
 						start_game()
 					end
-				end)
+				end, gameSequenceNumber)
 			end
 		else
 			minetest.chat_send_player(name, "Already ingame!")
