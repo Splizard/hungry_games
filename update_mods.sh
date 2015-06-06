@@ -32,6 +32,8 @@ for i in $(ls); do
 	trash ../mods/$i
 	mv $i ../mods/$i
 done
+
+# remove folder
 cd ..
 rm -R tmp
 
