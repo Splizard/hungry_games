@@ -536,11 +536,11 @@ minetest.register_chatcommand("vote", {
 			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > hungry_games.vote_unanimous and num*hungry_games.vote_percent) or num) )
 
 			local cv = check_votes()
-			if votes > 1 and force_init_warning == false and cv == false then
-				minetest.chat_send_all("The match will automatically be initiated in 5min.")
+			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
+				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " Minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds")
 				force_init_warning = true
-				set_timer("vote", 60*5)
-				minetest.after((60*5), function () 
+				set_timer("vote", hungry_games.vote_countdown)
+				minetest.after(hungry_games.vote_countdown, function () 
 					if not (starting_game or ingame) then
 						start_game()
 					end

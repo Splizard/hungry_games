@@ -50,6 +50,9 @@ hungry_games.vote_percent = 0.5
 --If the number of connected players is less than or equal to this, the vote to start must be unaimous
 hungry_games.vote_unanimous = 5
 
+--If the number of votes is greater than or equal to 1, a timer will start that will automatically initiate the match in this many seconds (nil to disable)
+hungry_games.vote_countdown = 120
+
 --Set what players can dig, should be modifyed along with glass_arena.replace
 -- (See Above Section)
 --Values "none" (can't dig), "restricted" (only dig with hand), "normal" (normal minetest). 
