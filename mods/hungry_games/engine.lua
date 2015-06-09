@@ -351,7 +351,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num > 1 and (votes >= num or (num > hungry_games.vote_unanimous and votes > num*hungry_games.vote_percent)) then
+		if num > 1 and (votes >= num or (num >= hungry_games.vote_unanimous and votes >= math.ceil(num*hungry_games.vote_percent))) then
 			start_game()
 			return true
 		end
@@ -533,7 +533,7 @@ minetest.register_chatcommand("vote", {
 			end
 			voters[name] = true
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > hungry_games.vote_unanimous and num*hungry_games.vote_percent) or num) )
+			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
 
 			local cv = check_votes()
 			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
