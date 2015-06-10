@@ -533,7 +533,7 @@ minetest.register_chatcommand("vote", {
 			end
 			voters[name] = true
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
+			minetest.chat_send_all(name.. " has voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
 
 			local cv = check_votes()
 			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
@@ -576,7 +576,7 @@ minetest.register_chatcommand("register", {
 			registrants[name] = true
 			minetest.chat_send_player(name, "You have registered!")
 		else
-			minetest.chat_send_player(name, "Sorry! There is no spot left for you.")
+			minetest.chat_send_player(name, "Sorry! There are no spots left for you to spawn.")
 		end
 	end,
 })
