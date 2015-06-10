@@ -32,8 +32,10 @@ inventory_plus.register_button = function(player,name,label)
 	if inventory_plus.buttons_ordered[player_name] == nil then
 		inventory_plus.buttons_ordered[player_name] = {[1]="main"}
 	end
-	inventory_plus.buttons[player_name][name] = label
-	table.insert(inventory_plus.buttons_ordered[player_name], name)
+	if inventory_plus.buttons[player_name][name] == nil then
+		inventory_plus.buttons[player_name][name] = label
+		table.insert(inventory_plus.buttons_ordered[player_name], name)
+	end
 end
 
 inventory_plus.is_called = function(fields, compare_tabidname, player)
