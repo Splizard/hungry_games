@@ -142,7 +142,6 @@ local check_win = function()
 		end
 		if count <= 1 then
 			local winnerName
-			print(dump(currGame))
 			for playerName,_ in pairs(currGame) do
 				local winnerPos = minetest.get_player_by_name(playerName):getpos()
 				winnerName = playerName
@@ -207,10 +206,10 @@ end)
 
 local start_game_now = function(contestants)
 	for i,player in ipairs(contestants) do
-		local name = player:get_player_name()
-		currGame[name] = true
-		local privs = minetest.get_player_privs(name)
-		if minetest.get_player_by_name(name) then	
+		local name = player:get_player_name()	
+		if minetest.get_player_by_name(name) then
+			currGame[name] = true
+			local privs = minetest.get_player_privs(name)	
 			privs.fast = nil
 			privs.fly = nil
 			privs.interact = true
