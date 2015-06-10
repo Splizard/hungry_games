@@ -6,6 +6,7 @@ local grace = false
 local countdown = false
 
 local registrants = {}
+local voters = {}
 local currGame = {}
 
 local spots_shuffled = {}
@@ -119,7 +120,6 @@ local stop_game = function()
 			privs.fast = nil
 			privs.fly = nil
 			privs.interact = nil
-			privs.vote = true
 			minetest.set_player_privs(name, privs)
 			player:set_hp(20)
 			spawning.spawn(player, "lobby")
@@ -156,7 +156,6 @@ local check_win = function()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 				local privs = minetest.get_player_privs(name)
-				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
 			
@@ -215,7 +214,6 @@ local start_game_now = function(contestants)
 			privs.fast = nil
 			privs.fly = nil
 			privs.interact = true
-			privs.vote = nil
 			minetest.set_player_privs(name, privs)
 			minetest.after(0.1, function(table)
 				local player = table[1]
@@ -244,6 +242,7 @@ local start_game_now = function(contestants)
 	end
 	minetest.setting_set("enable_damage", "true")
 	votes = 0
+	voters = {}
 	ingame = true
 	countdown = false
 	starting_game = false
@@ -352,7 +351,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num > 1 and (votes >= num or (num > hungry_games.vote_unanimous and votes > num*hungry_games.vote_percent)) then
+		if num > 1 and (votes >= num or (num >= hungry_games.vote_unanimous and votes >= math.ceil(num*hungry_games.vote_percent))) then
 			start_game()
 			return true
 		end
@@ -443,7 +442,7 @@ minetest.register_on_leaveplayer(function(player)
 	currGame[name] = nil
 	timer_hudids[name] = nil
    	local privs = minetest.get_player_privs(name)
-	if not privs.vote and votes > 0 then
+	if voters[name] and votes > 0 then
 		votes = votes - 1
 	end
 	if registrants[name] then registrants[name] = nil end
@@ -518,26 +517,27 @@ minetest.register_chatcommand("hg", {
 })
 
 minetest.register_chatcommand("vote", {
-	description = "Vote to start the Hungry Games",
+	description = "Vote to start the Hungry Games.",
 	privs = {vote=true},
 	func = function(name, param)
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
 		if num == 1 then
-			minetest.chat_send_player(name, "Need more players!")
+			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
 			return
 		end
-		if not ingame then
-			local privs = minetest.get_player_privs(name)
-			privs.vote = nil
-			minetest.set_player_privs(name, privs)
-
+		if not ingame and not starting_game then
+			if voters[name] ~= nil then
+				minetest.chat_send_player(name, "You already have voted.")
+				return
+			end
+			voters[name] = true
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > hungry_games.vote_unanimous and num*hungry_games.vote_percent) or num) )
+			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
 
 			local cv = check_votes()
 			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
-				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " Minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds")
+				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds.")
 				force_init_warning = true
 				set_timer("vote", hungry_games.vote_countdown)
 				minetest.after(hungry_games.vote_countdown, function () 
@@ -576,7 +576,7 @@ minetest.register_chatcommand("register", {
 			registrants[name] = true
 			minetest.chat_send_player(name, "You have registered!")
 		else
-			minetest.chat_send_player(name, "Sorry! no spots left!")
+			minetest.chat_send_player(name, "Sorry! There is no spot left for you.")
 		end
 	end,
 })
