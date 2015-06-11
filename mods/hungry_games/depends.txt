@@ -1,7 +1,6 @@
 default
 random_chests
 glass_arena
-dead_drop
 food
 throwing
 survival_lib

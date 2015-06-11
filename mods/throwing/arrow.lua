@@ -49,24 +49,24 @@ THROWING_ARROW_ENTITY.on_step = function(self, dtime)
 		for k, obj in pairs(objs) do
 			if obj:get_luaentity() ~= nil then
 				if obj:get_luaentity().name ~= "throwing:arrow_entity" and obj:get_luaentity().name ~= "__builtin:item" then
-					local damage = 3
+					local damage = 0
+					if minetest.setting_getbool("enable_pvp") then
+						damage = 3
+					end
 					obj:punch(self.object, 1.0, {
 						full_punch_interval=1.0,
-						groupcaps={
-							fleshy={times={[1]=1/(damage-2), [2]=1/(damage-1), [3]=1/damage}},
-							snappy={times={[1]=1/(damage-2), [2]=1/(damage-1), [3]=1/damage}},
-						}
+						damage_groups={fleshy=damage},
 					}, nil)
 					self.object:remove()
 				end
 			else
-				local damage = 3
+				local damage = 0
+				if minetest.setting_getbool("enable_pvp") then
+					damage = 3
+				end
 				obj:punch(self.object, 1.0, {
 					full_punch_interval=1.0,
-					groupcaps={
-						fleshy={times={[1]=1/(damage-2), [2]=1/(damage-1), [3]=1/damage}},
-						snappy={times={[1]=1/(damage-2), [2]=1/(damage-1), [3]=1/damage}},
-					}
+					damage_groups={fleshy=damage},
 				}, nil)
 				self.object:remove()
 			end

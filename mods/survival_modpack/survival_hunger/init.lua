@@ -92,7 +92,8 @@ local function override_on_use ( def )
                 soundname = "survival_hunger_eat";
             end
             minetest.sound_play({ name=soundname }, {
-                to_player = user:getpos();
+                pos = user:getpos();
+                max_hear_distance = 16;
                 gain = 1.0;
             });
             if (on_use) then
@@ -133,6 +134,7 @@ survival.register_state("hunger", {
         pos = {x=0.5, y=0.9};
         offset = {x=-175, y=-15};
         image = "survival_hunger_hud_apple.png";
+        bar = "survival_hunger_hud_bar.png";
     };
     get_default = function ( hudidn )
         return {
@@ -141,11 +143,12 @@ survival.register_state("hunger", {
             flag = false;
         };
     end;
+    default_scaled_value = 0;
     get_scaled_value = function ( state )
         if (state.flag) then
-            return 0;
+            return 100;
         else
-            return 100 * (START_HUNGER_TIME - state.count) / START_HUNGER_TIME;
+            return 100 - (100 * (START_HUNGER_TIME - state.count) / START_HUNGER_TIME);
         end
     end;
     on_update = function ( dtime, player, state )

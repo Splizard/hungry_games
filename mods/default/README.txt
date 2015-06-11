@@ -88,12 +88,6 @@ Calinou (CC BY-SA):
   default_copper_lump.png
   default_mineral_copper.png
 
-MirceaKitsune (WTFPL):
-  character.x
-
-Jordach (CC BY-SA 3.0):
-  character.png
-
 PilzAdam (WTFPL):
   default_jungleleaves.png
   default_junglesapling.png
@@ -179,3 +173,21 @@ Mito551 (sounds) (CC BY-SA):
   default_dirt_footstep.1.ogg
   default_dirt_footstep.2.ogg
   default_glass_footstep.ogg
+
+Unknown author (WTFPL):
+  default_inventory_background.png
+
+Independent.nu (sounds) (WTFPL):
+  player_damage.1.ogg
+  player_damage.2.ogg
+  player_damage.3.ogg
+  player_damage.4.ogg
+
+hintriger (sounds) (WTFPL):
+  player_falling_damage.1.ogg
+  player_falling_damage.2.ogg
+
+Wuzzy and others (WTFPL)
+  crosshair.png
+  gui_hudbar.png
+  gui_hudbar_selected.png

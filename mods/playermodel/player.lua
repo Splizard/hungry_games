@@ -1,4 +1,4 @@
--- Minetest 0.4 mod: player
+-- Minetest 0.4 mod: Player Model [playermodel]
 -- See README.txt for licensing and other information.
 
 --[[
@@ -84,6 +84,7 @@ local player_model = {}
 local player_textures = {}
 local player_anim = {}
 local player_sneak = {}
+default.player_attached = {}
 
 function default.player_get_animation(player)
 	local name = player:get_player_name()
@@ -111,7 +112,7 @@ function default.player_set_model(player, model_name)
 		default.player_set_animation(player, "stand")
 	else
 		player:set_properties({
-			textures = { "player.png", "player_back.png", },
+			textures = { "playermodel_dummy_front.png", "playermodel_dummy_back.png", },
 			visual = "upright_sprite",
 		})
 	end
@@ -140,7 +141,10 @@ end
 
 -- Update appearance when the player joins
 minetest.register_on_joinplayer(function(player)
+	default.player_attached[player:get_player_name()] = false
 	default.player_set_model(player, "character.x")
+	player:set_local_animation({x=0, y=79}, {x=168, y=187}, {x=189, y=198}, {x=200, y=219}, 30)
+	player:set_eye_offset({x=0, y=0, z=0}, {x=0, y=4, z=0})
 end)
 
 minetest.register_on_leaveplayer(function(player)
@@ -159,7 +163,7 @@ minetest.register_globalstep(function(dtime)
 		local name = player:get_player_name()
 		local model_name = player_model[name]
 		local model = model_name and models[model_name]
-		if model then
+		if model and not default.player_attached[name] then
 			local controls = player:get_player_control()
 			local walking = false
 			local animation_speed_mod = model.animation_speed or 30
