@@ -6,7 +6,8 @@
 |_|  |_|\__,_|_| |_|\__, |_|   \__, |  \_____|\__,_|_| |_| |_|\___||___/
                      __/ |      __/ |                                   
                     |___/      |___/                                    
-By Splizard
+By Splizard.
+(For a full list of contributers see [this](https://github.com/Splizard/hungry_games/graphs/contributors))
 
 Github: https://github.com/Splizard/hungry_games
 Forum:  http://forum.minetest.net/viewtopic.php?id=4582
@@ -33,7 +34,7 @@ ATTENTION SERVER ADMINS:
 When hosting a hungry games server please edit the hungry_games mod for configuring
 the game, this is the minetest/games/hungry_games/mods/hungry_games/init.lua file. The file is meant to document itself but if you need help understanding the configuration just ask.
 
-** Linux users will find the games folder in /usr/share/minetest/**
+** Linux users will find the games folder in ~/.minetest/games/**
 
 CHAT COMMANDS:
 ---------------
