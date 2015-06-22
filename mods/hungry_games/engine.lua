@@ -502,8 +502,13 @@ minetest.register_chatcommand("hg", {
 			end
 		until false
 		local ret
+		local num_players  = #minetest.get_connected_players()
 		--Restarts/Starts game.
 		if parms[1] == "start" then
+			if num_players < 2 then
+				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
 			local nostart
 			if starting_game or ingame then
 				nostart = true
@@ -515,6 +520,10 @@ minetest.register_chatcommand("hg", {
 		elseif parms[1] == "restart" or parms[1] == 'r' then
 			if starting_game or ingame then
 				stop_game()
+			end
+			if num_players < 2 then
+				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
 			end
 			ret = start_game()
 			if ret == false then
@@ -567,8 +576,8 @@ minetest.register_chatcommand("vote", {
 	privs = {vote=true},
 	func = function(name, param)
 		local players = minetest.get_connected_players()
-		local num = table.getn(players)
-		if num == 1 then
+		local num = #players
+		if num < 2 then
 			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
 			return
 		end
