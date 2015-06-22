@@ -515,6 +515,10 @@ minetest.register_chatcommand("hg", {
 				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
 				return
 			end
+			if get_spots() < 2 then
+				minetest.chat_send_player(name, "There are less than 2 active spawn positions. Please set new spawn positions with \"/hg set player_#\".")
+				return
+			end
 			local nostart
 			if starting_game or ingame then
 				nostart = true
@@ -533,6 +537,10 @@ minetest.register_chatcommand("hg", {
 			end
 			if num_players < 2 then
 				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
+			if get_spots() < 2 then
+				minetest.chat_send_player(name, "There are less than 2 active spawn positions. Please set new spawn positions with \"/hg set player_#\".")
 				return
 			end
 			ret = start_game()
@@ -619,6 +627,10 @@ minetest.register_chatcommand("vote", {
 		local num = #players
 		if num < 2 then
 			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+			return
+		end
+		if get_spots() < 2 then
+			minetest.chat_send_player(name, "Spawn positions haven't been set yet. The game can not be started at the moment.")
 			return
 		end
 		if not ingame and not starting_game then
