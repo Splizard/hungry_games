@@ -513,9 +513,12 @@ minetest.register_chatcommand("hg", {
 			if starting_game or ingame then
 				nostart = true
 			end
-			ret = start_game()
-			if ret == false or nostart then
+			if nostart then
 				minetest.chat_send_player(name, "There is already a game running!")
+			end
+			ret = start_game()
+			if ret == false then
+				minetest.chat_send_player(name, "The game could not be started.")
 			end
 		elseif parms[1] == "restart" or parms[1] == 'r' then
 			if starting_game or ingame then
