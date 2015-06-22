@@ -482,8 +482,8 @@ minetest.register_privilege("register", "Privilege to register.")
 
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
-	params = "start | restart | stop | build | set player_<n> | lobby | spawn",
-	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players.",
+	params = "start | restart | stop | build | [un]set player_<n> | lobby | spawn",
+	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players; unset: Like set, but removes spawn position",
 	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
@@ -564,6 +564,13 @@ minetest.register_chatcommand("hg", {
 				minetest.chat_send_player(name, parms[2].." has been set to "..pos.x.." "..pos.y.." "..pos.z)
 			else
 				minetest.chat_send_player(name, "Set what?")
+			end
+		elseif parms[1] == "unset" then
+			if parms[2] ~= nil and (parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d")) then
+				spawning.unset_spawn(parms[2])
+				minetest.chat_send_player(name, parms[2].." has been unset.")
+			else
+				minetest.chat_send_player(name, "Unset what?")
 			end
 		else
 			minetest.chat_send_player(name, "Unknown subcommand! Use /help hg for a list of available subcommands.")
