@@ -6,9 +6,12 @@ local grace = false
 local countdown = false
 
 local registrants = {}
+local voters = {}
 local currGame = {}
 local gameSequenceNumber = 0	--[[ Sequence number of current round, will be incremented each round.
 				     Used to determine whether minetest.after calls are still valid or should be discarded. ]]
+
+local spots_shuffled = {}
 
 local timer_hudids = {}
 
@@ -119,7 +122,6 @@ local stop_game = function()
 			privs.fast = nil
 			privs.fly = nil
 			privs.interact = nil
-			privs.vote = true
 			minetest.set_player_privs(name, privs)
 			player:set_hp(20)
 			spawning.spawn(player, "lobby")
@@ -143,7 +145,6 @@ local check_win = function()
 		end
 		if count <= 1 then
 			local winnerName
-			print(dump(currGame))
 			for playerName,_ in pairs(currGame) do
 				local winnerPos = minetest.get_player_by_name(playerName):getpos()
 				winnerName = playerName
@@ -157,7 +158,6 @@ local check_win = function()
 			for _,player in ipairs(players) do
 				local name = player:get_player_name()
 				local privs = minetest.get_player_privs(name)
-				privs.vote = true
 				minetest.set_player_privs(name, privs)
 			end
 			
@@ -214,14 +214,13 @@ local start_game_now = function(input)
 		return false
 	end
 	for i,player in ipairs(contestants) do
-		local name = player:get_player_name()
-		currGame[name] = true
-		local privs = minetest.get_player_privs(name)
-		if minetest.get_player_by_name(name) then	
+		local name = player:get_player_name()	
+		if minetest.get_player_by_name(name) then
+			currGame[name] = true
+			local privs = minetest.get_player_privs(name)	
 			privs.fast = nil
 			privs.fly = nil
 			privs.interact = true
-			privs.vote = nil
 			minetest.set_player_privs(name, privs)
 			minetest.after(0.1, function(table)
 				local player = table[1]
@@ -254,6 +253,7 @@ local start_game_now = function(input)
 	end
 	minetest.setting_set("enable_damage", "true")
 	votes = 0
+	voters = {}
 	ingame = true
 	countdown = false
 	starting_game = false
@@ -270,6 +270,7 @@ local start_game = function()
 	grace = false
 	countdown = true
 	
+	local i = 1
 	if hungry_games.countdown > 8.336 then
 		minetest.after(hungry_games.countdown-8.336, function(gsn)
 			if gsn == gameSequenceNumber and starting_game then
@@ -279,12 +280,39 @@ local start_game = function()
 	end
 	print("filling chests...")
 	random_chests.refill()
-	local i = 1
 	--Find out how many spots there are to spawn
-	local spots = get_spots()
-	local diff =  spots-table.getn(registrants)
+	local nspots = get_spots()
+	local diff =  nspots-table.getn(registrants)
 	local contestants = {}
-	for _,player in pairs(minetest.get_connected_players() ) do
+
+	-- Shuffle players
+	local players = minetest.get_connected_players()
+	local players_shuffled = {}
+	local shuffle_free = {}
+	for j=1,#players do
+		shuffle_free[j] = j
+	end
+	for j=1,#players do
+		local rnd = math.random(1, #shuffle_free)
+		players_shuffled[j] = players[shuffle_free[rnd]]
+		table.remove(shuffle_free, rnd)
+	end
+
+	-- Shuffle spots as well
+	shuffle_free = {}
+	spots_shuffled = {}
+	for j=1,nspots do
+		shuffle_free[j] = j
+	end
+	for j=1,nspots do
+		local rnd = math.random(1, #shuffle_free)
+		spots_shuffled[j] = shuffle_free[rnd]
+		table.remove(shuffle_free, rnd)
+	end
+
+	-- Spawn players
+	for p=1,#players_shuffled  do
+		local player = players_shuffled[p]
 		if diff > 0 then
 			registrants[player:get_player_name()] = true
 			diff = diff - 1
@@ -292,15 +320,15 @@ local start_game = function()
 		drop_player_items(player:get_player_name(), true)
 		minetest.after(0.1, function(list)
 			local player = list[1]
-			local i = list[2]
+			local spawn_id = list[2]
 			local gsn = list[3]
 			if gsn ~= gameSequenceNumber or not starting_game then
 				return
 			end
 			local name = player:get_player_name()
-			if registrants[name] == true and spawning.is_spawn("player_"..i) then
+			if registrants[name] == true and spawn_id ~= nil and spawning.is_spawn("player_"..spawn_id) then
 				table.insert(contestants, player)
-				spawning.spawn(player, "player_"..i)
+				spawning.spawn(player, "player_"..spawn_id)
 				reset_player_state(player)
 				minetest.chat_send_player(name, "Get ready to fight!")
 			else
@@ -326,13 +354,13 @@ local start_game = function()
 				end
 				for i,player in ipairs(contestants) do
 					minetest.after(0.1, function(table)
-						player = table[1]
-						i = table[2]
+						local player = table[1]
+						local i = table[2]
 						local name = player:get_player_name()
 						if spawning.is_spawn("player_"..i) then
 							spawning.spawn(player, "player_"..i)
 						end
-					end, {player, i})
+					end, {player, spots_shuffled[i]})
 				end
 			end, {contestants,i,gameSequenceNumber})
 		end
@@ -346,7 +374,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num > 1 and (votes >= num or (num > hungry_games.vote_unanimous and votes > num*hungry_games.vote_percent)) then
+		if num > 1 and (votes >= num or (num >= hungry_games.vote_unanimous and votes >= math.ceil(num*hungry_games.vote_percent))) then
 			start_game()
 			return true
 		end
@@ -437,7 +465,7 @@ minetest.register_on_leaveplayer(function(player)
 	currGame[name] = nil
 	timer_hudids[name] = nil
    	local privs = minetest.get_player_privs(name)
-	if not privs.vote and votes > 0 then
+	if voters[name] and votes > 0 then
 		votes = votes - 1
 	end
 	if registrants[name] then registrants[name] = nil end
@@ -535,30 +563,31 @@ minetest.register_chatcommand("hg", {
 })
 
 minetest.register_chatcommand("vote", {
-	description = "Vote to start the Hungry Games",
+	description = "Vote to start the Hungry Games.",
 	privs = {vote=true},
 	func = function(name, param)
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
 		if num == 1 then
-			minetest.chat_send_player(name, "Need more players!")
+			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
 			return
 		end
-		if not ingame then
-			local privs = minetest.get_player_privs(name)
-			privs.vote = nil
-			minetest.set_player_privs(name, privs)
-
+		if not ingame and not starting_game then
+			if voters[name] ~= nil then
+				minetest.chat_send_player(name, "You already have voted.")
+				return
+			end
+			voters[name] = true
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has have voted to begin! Votes so far: "..votes.."; Votes needed: "..((num > hungry_games.vote_unanimous and num*hungry_games.vote_percent) or num) )
+			minetest.chat_send_all(name.. " has voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
 
 			local cv = check_votes()
-			if votes > 1 and force_init_warning == false and cv == false then
-				minetest.chat_send_all("The match will automatically be initiated in 5min.")
+			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
+				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds.")
 				force_init_warning = true
-				set_timer("vote", 60*5)
-				minetest.after((60*5), function (gsn)
-					if not (starting_game or ingame) and gsn == gameSequenceNumber then
+				set_timer("vote", hungry_games.vote_countdown)
+				minetest.after(hungry_games.vote_countdown, function (gsn) 
+					if not (starting_game or ingame and gsn == gameSequenceNumber) then
 						start_game()
 					end
 				end, gameSequenceNumber)
@@ -593,7 +622,7 @@ minetest.register_chatcommand("register", {
 			registrants[name] = true
 			minetest.chat_send_player(name, "You have registered!")
 		else
-			minetest.chat_send_player(name, "Sorry! no spots left!")
+			minetest.chat_send_player(name, "Sorry! There are no spots left for you to spawn.")
 		end
 	end,
 })

@@ -88,12 +88,6 @@ Calinou (CC BY-SA):
   default_copper_lump.png
   default_mineral_copper.png
 
-MirceaKitsune (WTFPL):
-  character.x
-
-Jordach (CC BY-SA 3.0):
-  character.png
-
 PilzAdam (WTFPL):
   default_jungleleaves.png
   default_junglesapling.png
