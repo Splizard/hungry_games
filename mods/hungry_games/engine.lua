@@ -8,6 +8,8 @@ local countdown = false
 local registrants = {}
 local voters = {}
 local currGame = {}
+local gameSequenceNumber = 0	--[[ Sequence number of current round, will be incremented each round.
+				     Used to determine whether minetest.after calls are still valid or should be discarded. ]]
 
 local spots_shuffled = {}
 
@@ -40,8 +42,8 @@ local unset_timer = function()
 	update_timer_hud("")
 end
 
-local end_grace = function()
-	if ingame then
+local end_grace = function(gsn)
+	if ingame and gsn == gameSequenceNumber then
 		minetest.setting_set("enable_pvp", "true")
 		minetest.chat_send_all("Grace peroid over!")
 		grace = false
@@ -130,6 +132,7 @@ local stop_game = function()
 	ingame = false
 	grace = false
 	countdown = false
+	starting_game = false
 	force_init_warning = false
 	unset_timer()
 end
@@ -204,7 +207,12 @@ minetest.register_globalstep(function(dtime)
 	end
 end)
 
-local start_game_now = function(contestants)
+local start_game_now = function(input)
+	local contestants = input[1]
+	local gsn = input[2]
+	if gsn ~= gameSequenceNumber or not starting_game then
+		return false
+	end
 	for i,player in ipairs(contestants) do
 		local name = player:get_player_name()	
 		if minetest.get_player_by_name(name) then
@@ -217,11 +225,15 @@ local start_game_now = function(contestants)
 			minetest.after(0.1, function(table)
 				local player = table[1]
 				local i = table[2]
+				local gsn = table[3]
+				if gsn ~= gameSequenceNumber then
+					return
+				end
 				local name = player:get_player_name()
 				if spawning.is_spawn("player_"..i) then
 					spawning.spawn(player, "player_"..i)
 				end
-			end, {player, spots_shuffled[i]})
+			end, {player, i, gameSequenceNumber})
 		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
@@ -234,7 +246,7 @@ local start_game_now = function(contestants)
 		grace = true
 		set_timer("grace", hungry_games.grace_period)
 		minetest.setting_set("enable_pvp", "false")
-		minetest.after(hungry_games.grace_period, end_grace)
+		minetest.after(hungry_games.grace_period, end_grace, gameSequenceNumber)
 	else
 		grace = false
 		unset_timer()
@@ -246,21 +258,25 @@ local start_game_now = function(contestants)
 	countdown = false
 	starting_game = false
 	minetest.sound_play("hungry_games_start")
+	return true
 end
 
 local start_game = function()
 	if starting_game then
 		return
 	end
+	gameSequenceNumber = gameSequenceNumber + 1
 	starting_game = true
 	grace = false
 	countdown = true
 	
 	local i = 1
 	if hungry_games.countdown > 8.336 then
-		minetest.after(hungry_games.countdown-8.336, function()
-			minetest.sound_play("hungry_games_prestart")
-		end)
+		minetest.after(hungry_games.countdown-8.336, function(gsn)
+			if gsn == gameSequenceNumber and starting_game then
+				minetest.sound_play("hungry_games_prestart")
+			end
+		end, gameSequenceNumber)
 	end
 	print("filling chests...")
 	random_chests.refill()
@@ -305,6 +321,10 @@ local start_game = function()
 		minetest.after(0.1, function(list)
 			local player = list[1]
 			local spawn_id = list[2]
+			local gsn = list[3]
+			if gsn ~= gameSequenceNumber or not starting_game then
+				return
+			end
 			local name = player:get_player_name()
 			if registrants[name] == true and spawn_id ~= nil and spawning.is_spawn("player_"..spawn_id) then
 				table.insert(contestants, player)
@@ -314,7 +334,7 @@ local start_game = function()
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
 			end
-		end, {player, spots_shuffled[i]})
+		end, {player, i, gameSequenceNumber})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
 	minetest.setting_set("enable_damage", "false")
@@ -324,6 +344,10 @@ local start_game = function()
 			minetest.after(i, function(list)
 				local contestants = list[1]
 				local i = list[2]
+				local gsn = list[3]
+				if gsn ~= gameSequenceNumber or not starting_game then
+					return
+				end
 				local time_left = hungry_games.countdown-i
 				if time_left%4==0 and time_left >= 16 then
 					minetest.sound_play("hungry_games_starting_drum")
@@ -338,11 +362,11 @@ local start_game = function()
 						end
 					end, {player, spots_shuffled[i]})
 				end
-			end, {contestants,i})
+			end, {contestants,i,gameSequenceNumber})
 		end
-		minetest.after(hungry_games.countdown, start_game_now, contestants)
+		minetest.after(hungry_games.countdown, start_game_now, {contestants,gameSequenceNumber})
 	else
-		start_game_now(contestants)
+		start_game_now({contestants,gameSequenceNumber})
 	end
 end
 
@@ -458,8 +482,8 @@ minetest.register_privilege("register", "Privilege to register.")
 
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
-	params = "<command>",
-	description = "Manage hungry_games",
+	params = "start | restart | stop | build | set player_<n> | lobby | spawn",
+	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players.",
 	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
@@ -477,13 +501,46 @@ minetest.register_chatcommand("hg", {
 				break
 			end
 		until false
+		local ret
+		local num_players  = #minetest.get_connected_players()
 		--Restarts/Starts game.
-		if parms[1] == "restart" or parms[1] == 'r' or parms[1] == "start" then
-			start_game()
+		if parms[1] == "start" then
+			if num_players < 2 then
+				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
+			local nostart
+			if starting_game or ingame then
+				nostart = true
+			end
+			if nostart then
+				minetest.chat_send_player(name, "There is already a game running!")
+			end
+			ret = start_game()
+			if ret == false then
+				minetest.chat_send_player(name, "The game could not be started.")
+			end
+		elseif parms[1] == "restart" or parms[1] == 'r' then
+			if starting_game or ingame then
+				stop_game()
+			end
+			if num_players < 2 then
+				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
+			ret = start_game()
+			if ret == false then
+				minetest.chat_send_player(name, "The game could not be restarted.")
+			end
+
 		--Stops Game.
 		elseif parms[1] == "stop" then
-			stop_game()
-			minetest.chat_send_all("The Hunger Games has been stopped!")
+			if starting_game or ingame then
+				stop_game()
+				minetest.chat_send_all("The Hunger Games have been stopped!")
+			else
+				minetest.chat_send_player(name, "The game has already been stopped.")
+			end
 		elseif parms[1] == "build" then
 			if not ingame then
 				local privs = minetest.get_player_privs(name)
@@ -498,7 +555,7 @@ minetest.register_chatcommand("hg", {
 				return
 			end
 		elseif parms[1] == "set" then
-			if parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d") then
+			if parms[2] ~= nil and (parms[2] == "spawn" or parms[2] == "lobby" or parms[2]:match("player_%d")) then
 				local pos = {}
 				if parms[3] and parms[4] and parms[5] then
 					pos = {x=parms[3],y=parms[4],z=parms[5]}
@@ -511,6 +568,8 @@ minetest.register_chatcommand("hg", {
 			else
 				minetest.chat_send_player(name, "Set what?")
 			end
+		else
+			minetest.chat_send_player(name, "Unknown subcommand! Use /help hg for a list of available subcommands.")
 		end
 	end,
 })
@@ -520,8 +579,8 @@ minetest.register_chatcommand("vote", {
 	privs = {vote=true},
 	func = function(name, param)
 		local players = minetest.get_connected_players()
-		local num = table.getn(players)
-		if num == 1 then
+		local num = #players
+		if num < 2 then
 			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
 			return
 		end
@@ -539,11 +598,11 @@ minetest.register_chatcommand("vote", {
 				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds.")
 				force_init_warning = true
 				set_timer("vote", hungry_games.vote_countdown)
-				minetest.after(hungry_games.vote_countdown, function () 
-					if not (starting_game or ingame) then
+				minetest.after(hungry_games.vote_countdown, function (gsn) 
+					if not (starting_game or ingame and gsn == gameSequenceNumber) then
 						start_game()
 					end
-				end)
+				end, gameSequenceNumber)
 			end
 		else
 			minetest.chat_send_player(name, "Already ingame!")
