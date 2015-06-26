@@ -83,7 +83,7 @@ random_chests.enable()
 --Set the boundary where chests are spawned
 --Should be set to the same or smaller then the arena.
 --Defaults to whole map.
-random_chests.set_boundary(200)
+random_chests.set_boundary(400)
 
 --Set Chest Rarity.
 --Rarity is how many chests per chunk.
