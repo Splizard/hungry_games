@@ -123,6 +123,7 @@ local stop_game = function()
 			privs.fly = nil
 			privs.interact = nil
 			minetest.set_player_privs(name, privs)
+			drop_player_items(name, true)
 			player:set_hp(20)
 			spawning.spawn(player, "lobby")
 		end)
@@ -162,7 +163,6 @@ local check_win = function()
 			end
 			
 			stop_game()
-			drop_player_items(winnerName, true)
 		end
 	end
 end
