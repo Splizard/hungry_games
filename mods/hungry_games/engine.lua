@@ -262,7 +262,7 @@ local start_game_now = function(input)
 end
 
 local start_game = function()
-	if starting_game then
+	if starting_game or ingame then
 		return
 	end
 	gameSequenceNumber = gameSequenceNumber + 1
