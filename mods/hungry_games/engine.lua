@@ -233,7 +233,7 @@ local start_game_now = function(input)
 				if spawning.is_spawn("player_"..i) then
 					spawning.spawn(player, "player_"..i)
 				end
-			end, {player, i, gameSequenceNumber})
+			end, {player, spots_shuffled[i], gameSequenceNumber})
 		end
 	end
 	minetest.chat_send_all("The Hungry Games has begun!")
@@ -334,7 +334,7 @@ local start_game = function()
 			else
 				minetest.chat_send_player(name, "There are no spots for you to spawn!")
 			end
-		end, {player, i, gameSequenceNumber})
+		end, {player, spots_shuffled[i], gameSequenceNumber})
 		if registrants[player:get_player_name()] then i = i + 1 end
 	end
 	minetest.setting_set("enable_damage", "false")
