@@ -19,6 +19,8 @@ local timer = nil
 local timer_updated = nil
 local timer_mode = nil	-- nil, "vote", "starting", "grace"
 
+local maintenance_mode = false		-- is true when server is in maintenance mode, no games can be started while in maintenance mode
+
 local update_timer_hud = function(text)
 	local players = minetest.get_connected_players()
 	for i=1,#players do
@@ -482,8 +484,8 @@ minetest.register_privilege("register", "Privilege to register.")
 
 --Hungry Games Chat Commands.
 minetest.register_chatcommand("hg", {
-	params = "start | restart | stop | build | [un]set player_<n> | lobby | spawn",
-	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players; unset: Like set, but removes spawn position",
+	params = "start | restart | stop | build | [un]set player_<n> | lobby | spawn | maintenance",
+	description = "Manage Hungry Games. start: Start Hungry Games; restart: Restart Hungry Games; stop: Abort current game; build: Building mode to set up lobby, arena, etc.; set player_<n>: Set spawn position of player <n> (starting by 1); set lobby: Set spawn position in lobby; set spawn: Set initial spawn position for new players; unset: Like set, but removes spawn position; maintenance: Toggle maintenance mode",
 	privs = {hg_admin=true},
 	func = function(name, param)
 		--Catch param.
@@ -505,8 +507,16 @@ minetest.register_chatcommand("hg", {
 		local num_players  = #minetest.get_connected_players()
 		--Restarts/Starts game.
 		if parms[1] == "start" then
+			if maintenance_mode then
+				minetest.chat_send_player(name, "This server is currently in maintenance mode, no games can be started while it is in maintenance mode. Use \"/hg maintenance off\" to disable it.")
+				return
+			end
 			if num_players < 2 then
 				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
+			if get_spots() < 2 then
+				minetest.chat_send_player(name, "There are less than 2 active spawn positions. Please set new spawn positions with \"/hg set player_#\".")
 				return
 			end
 			local nostart
@@ -521,11 +531,19 @@ minetest.register_chatcommand("hg", {
 				minetest.chat_send_player(name, "The game could not be started.")
 			end
 		elseif parms[1] == "restart" or parms[1] == 'r' then
+			if maintenance_mode then
+				minetest.chat_send_player(name, "This server is currently in maintenance mode, no games can be started while it is in maintenance mode. Use \"/hg maintenance off\" to disable it.")
+				return
+			end
 			if starting_game or ingame then
 				stop_game()
 			end
 			if num_players < 2 then
 				minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+				return
+			end
+			if get_spots() < 2 then
+				minetest.chat_send_player(name, "There are less than 2 active spawn positions. Please set new spawn positions with \"/hg set player_#\".")
 				return
 			end
 			ret = start_game()
@@ -575,6 +593,32 @@ minetest.register_chatcommand("hg", {
 			else
 				minetest.chat_send_player(name, "Unset what?")
 			end
+		elseif parms[1] == "maintenance" then
+			local maintenance_action
+			if parms[2] ~= nil then
+				if parms[2] == "on" then
+					maintenance_action = true
+				elseif parms[2] == "off" then
+					maintenance_action = false
+				end
+			else
+				maintenance_action = not maintenance_mode
+			end
+
+			if maintenance_action == true then
+				stop_game()
+				votes = 0
+				voters = {}
+				maintenance_mode = true
+				minetest.chat_send_all("This server is now in maintenance mode. The Hungry Games have been suspended until further notice.")
+			elseif maintenance_action == false then
+				votes = 0
+				voters = {}
+				maintenance_mode = false
+				minetest.chat_send_all("Server maintenance finished. The Hungry Games can begin!")
+			else
+				minetest.chat_send_player(name, "Invalid command syntax! Syntax: \"/hg maintenance [on|off]\"")
+			end
 		else
 			minetest.chat_send_player(name, "Unknown subcommand! Use /help hg for a list of available subcommands.")
 		end
@@ -585,10 +629,18 @@ minetest.register_chatcommand("vote", {
 	description = "Vote to start the Hungry Games.",
 	privs = {vote=true},
 	func = function(name, param)
+		if maintenance_mode then
+			minetest.chat_send_player(name, "This server is currently in maintenance mode, no games can be started at the moment. Please come back later when the server maintenance is over.")
+			return
+		end
 		local players = minetest.get_connected_players()
 		local num = #players
 		if num < 2 then
 			minetest.chat_send_player(name, "At least 2 players are needed to start a new round.")
+			return
+		end
+		if get_spots() < 2 then
+			minetest.chat_send_player(name, "Spawn positions haven't been set yet. The game can not be started at the moment.")
 			return
 		end
 		if not ingame and not starting_game then
