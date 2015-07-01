@@ -150,11 +150,9 @@ local check_win = function()
 		if count <= 1 then
 			local winnerName
 			for playerName,_ in pairs(currGame) do
-				local winnerPos = minetest.get_player_by_name(playerName):getpos()
-				winnerName = playerName
-				
-				minetest.chat_send_player(winnerName, "You Won!")
-				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner")
+				local winnerName = playerName
+				minetest.chat_send_player(winnerName, "You won!")
+				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner.")
 				minetest.sound_play("hungry_games_victory")
 			end
 		
@@ -165,6 +163,19 @@ local check_win = function()
 				minetest.set_player_privs(name, privs)
 			end
 			
+			stop_game()
+		end
+	elseif starting_game then
+		local players = minetest.get_connected_players()
+		if #players < 2 then
+			if #players == 1 then
+				local winnerName = players[1]:get_player_name()
+				minetest.chat_send_player(winnerName, "You won! (All other players have left.)")
+				minetest.sound_play("hungry_games_victory")
+
+				local privs = minetest.get_player_privs(winnerName)
+				minetest.set_player_privs(winnerName, privs)
+			end
 			stop_game()
 		end
 	end
