@@ -448,6 +448,7 @@ minetest.register_on_joinplayer(function(player)
 	minetest.set_player_privs(name, privs)
 	minetest.chat_send_player(name, "You are now spectating")
 	spawning.spawn(player, "lobby")
+	reset_player_state(player)
 	timer_hudids[name] = player:hud_add({
 		hud_elem_type = "text",
 		position = { x=0.5, y=0 },

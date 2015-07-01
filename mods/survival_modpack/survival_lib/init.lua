@@ -1,6 +1,6 @@
 
 survival = { };
-survival.active = true
+survival.active = false
 
 local player_states = { };
 local hudbar_active = {}
@@ -75,7 +75,9 @@ survival.disable = function()
             if (def.enabled) then
                 local name = def.name;
                 survival.reset_player_state(plname, name);
+                local state = player_states[plname][name];
                 if hudbar_active[plname] then
+                    hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
                     hb.hide_hudbar(player, name);
                 end
             end
@@ -133,20 +135,18 @@ minetest.register_globalstep(function ( dtime )
     local tmr = timer;
     timer = 0;
 
-    if survival.active then
-        for _,player in pairs(minetest.get_connected_players()) do
-            local inv = player:get_inventory();
-            local plname = player:get_player_name();
-            for i, def in ipairs(survival.registered_states) do
-                if (def.enabled) then
-                    local name = def.name;
-                    local state = player_states[plname][name];
-                    if (def.on_update) then
-                        def.on_update(tmr, player, state);
-                    end
-                    if hudbar_active[plname] then
-                        hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
-                    end
+    for _,player in pairs(minetest.get_connected_players()) do
+        local inv = player:get_inventory();
+        local plname = player:get_player_name();
+        for i, def in ipairs(survival.registered_states) do
+            if (def.enabled) then
+                local name = def.name;
+                local state = player_states[plname][name];
+                if (survival.active and def.on_update) then
+                    def.on_update(tmr, player, state);
+                end
+                if hudbar_active[plname] then
+                    hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
                 end
             end
         end
