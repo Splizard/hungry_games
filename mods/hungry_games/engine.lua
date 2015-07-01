@@ -21,6 +21,8 @@ local timer_mode = nil	-- nil, "vote", "starting", "grace"
 
 local maintenance_mode = false		-- is true when server is in maintenance mode, no games can be started while in maintenance mode
 
+hb.register_hudbar("votes", 0xFFFFFF, "Votes", { bar = "hungry_games_votebar.png", icon = "hungry_games_voteicon.png" }, 0, 0, false)
+
 local update_timer_hud = function(text)
 	local players = minetest.get_connected_players()
 	for i=1,#players do
@@ -51,6 +53,27 @@ local end_grace = function(gsn)
 		grace = false
 		unset_timer()
 		minetest.sound_play("hungry_games_grace_over")
+	end
+end
+
+local needed_votes = function()
+	local num = #minetest.get_connected_players()
+	if num <= hungry_games.vote_unanimous then
+		return num
+	else
+		return math.ceil(num*hungry_games.vote_percent)
+	end
+end
+
+local update_votebars = function()
+	local players = minetest.get_connected_players()
+	for i=1, #players do
+		hb.change_hudbar(players[i], "votes", votes, needed_votes())
+		if #players < 2 or ingame or starting_game then
+			hb.hide_hudbar(players[i], "votes")
+		else
+			hb.unhide_hudbar(players[i], "votes")
+		end
 	end
 end
 
@@ -256,6 +279,7 @@ local start_game_now = function(input)
 	minetest.setting_set("enable_damage", "true")
 	votes = 0
 	voters = {}
+	update_votebars()
 	ingame = true
 	countdown = false
 	starting_game = false
@@ -271,6 +295,9 @@ local start_game = function()
 	starting_game = true
 	grace = false
 	countdown = true
+	votes = 0
+	voters = {}
+	update_votebars()
 	
 	local i = 1
 	if hungry_games.countdown > 8.336 then
@@ -376,7 +403,7 @@ local check_votes = function()
 	if not ingame then
 		local players = minetest.get_connected_players()
 		local num = table.getn(players)
-		if num > 1 and (votes >= num or (num >= hungry_games.vote_unanimous and votes >= math.ceil(num*hungry_games.vote_percent))) then
+		if num > 1 and (votes >= needed_votes()) then
 			start_game()
 			return true
 		end
@@ -441,6 +468,8 @@ minetest.register_on_joinplayer(function(player)
 	minetest.set_player_privs(name, privs)
 	minetest.chat_send_player(name, "You are now spectating")
 	spawning.spawn(player, "lobby")
+	hb.init_hudbar(player, "votes", votes, needed_votes(), (ingame or starting_game or #minetest.get_connected_players() < 2))
+	update_votebars()
 	timer_hudids[name] = player:hud_add({
 		hud_elem_type = "text",
 		position = { x=0.5, y=0 },
@@ -470,6 +499,7 @@ minetest.register_on_leaveplayer(function(player)
 	if voters[name] and votes > 0 then
 		votes = votes - 1
 	end
+	update_votebars()
 	if registrants[name] then registrants[name] = nil end
 	minetest.after(1, function()
 		check_votes()
@@ -608,11 +638,13 @@ minetest.register_chatcommand("hg", {
 			if maintenance_action == true then
 				stop_game()
 				votes = 0
+				update_votebars()
 				voters = {}
 				maintenance_mode = true
 				minetest.chat_send_all("This server is now in maintenance mode. The Hungry Games have been suspended until further notice.")
 			elseif maintenance_action == false then
 				votes = 0
+				update_votebars()
 				voters = {}
 				maintenance_mode = false
 				minetest.chat_send_all("Server maintenance finished. The Hungry Games can begin!")
@@ -650,7 +682,8 @@ minetest.register_chatcommand("vote", {
 			end
 			voters[name] = true
 			votes = votes + 1
-			minetest.chat_send_all(name.. " has voted to begin! Votes so far: "..votes.."; Votes needed: "..((num >= hungry_games.vote_unanimous and math.ceil(num*hungry_games.vote_percent)) or num) )
+			update_votebars()
+			minetest.chat_send_all(name.. " has voted to begin! Votes so far: "..votes.."; Votes needed: "..needed_votes())
 
 			local cv = check_votes()
 			if votes > 1 and force_init_warning == false and cv == false and hungry_games.vote_countdown ~= nil then
