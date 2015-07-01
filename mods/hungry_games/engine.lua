@@ -21,6 +21,10 @@ local timer_mode = nil	-- nil, "vote", "starting", "grace"
 
 local maintenance_mode = false		-- is true when server is in maintenance mode, no games can be started while in maintenance mode
 
+-- Initial setup
+minetest.setting_set("enable_damage", "false")
+survival.disable()
+
 local update_timer_hud = function(text)
 	local players = minetest.get_connected_players()
 	for i=1,#players do
@@ -137,6 +141,8 @@ local stop_game = function()
 	countdown = false
 	starting_game = false
 	force_init_warning = false
+	survival.disable()
+	minetest.setting_set("enable_damage", "false")
 	unset_timer()
 end
 
@@ -254,6 +260,7 @@ local start_game_now = function(input)
 		unset_timer()
 	end
 	minetest.setting_set("enable_damage", "true")
+	survival.enable()
 	votes = 0
 	voters = {}
 	ingame = true
@@ -419,7 +426,7 @@ minetest.register_on_dieplayer(function(player)
 end)
 
 minetest.register_on_respawnplayer(function(player)
-	player:set_hp(1)
+	player:set_hp(20)
 	local name = player:get_player_name()
    	local privs = minetest.get_player_privs(name)
    	if (privs.interact or privs.fly) and (hungry_games.death_mode == "spectate") then
