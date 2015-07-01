@@ -69,7 +69,7 @@ local update_votebars = function()
 	local players = minetest.get_connected_players()
 	for i=1, #players do
 		hb.change_hudbar(players[i], "votes", votes, needed_votes())
-		if #players < 2 or ingame or starting_game then
+		if #players < 2 or ingame or starting_game or maintenance_mode then
 			hb.hide_hudbar(players[i], "votes")
 		else
 			hb.unhide_hudbar(players[i], "votes")
@@ -468,7 +468,7 @@ minetest.register_on_joinplayer(function(player)
 	minetest.set_player_privs(name, privs)
 	minetest.chat_send_player(name, "You are now spectating")
 	spawning.spawn(player, "lobby")
-	hb.init_hudbar(player, "votes", votes, needed_votes(), (ingame or starting_game or #minetest.get_connected_players() < 2))
+	hb.init_hudbar(player, "votes", votes, needed_votes(), (maintenance_mode or ingame or starting_game or #minetest.get_connected_players() < 2))
 	update_votebars()
 	timer_hudids[name] = player:hud_add({
 		hud_elem_type = "text",
@@ -638,15 +638,15 @@ minetest.register_chatcommand("hg", {
 			if maintenance_action == true then
 				stop_game()
 				votes = 0
-				update_votebars()
 				voters = {}
 				maintenance_mode = true
+				update_votebars()
 				minetest.chat_send_all("This server is now in maintenance mode. The Hungry Games have been suspended until further notice.")
 			elseif maintenance_action == false then
 				votes = 0
-				update_votebars()
 				voters = {}
 				maintenance_mode = false
+				update_votebars()
 				minetest.chat_send_all("Server maintenance finished. The Hungry Games can begin!")
 			else
 				minetest.chat_send_player(name, "Invalid command syntax! Syntax: \"/hg maintenance [on|off]\"")
