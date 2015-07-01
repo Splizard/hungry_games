@@ -1,7 +1,9 @@
 
 survival = { };
+survival.active = true
 
 local player_states = { };
+local hudbar_active = {}
 
 -- Boilerplate to support localized strings if intllib mod is installed.
 local S;
@@ -48,6 +50,40 @@ survival.register_state = function ( name, def )
     survival.registered_states[#survival.registered_states + 1] = def;
 end
 
+survival.enable = function()
+    for _,player in pairs(minetest.get_connected_players()) do
+        local inv = player:get_inventory();
+        local plname = player:get_player_name();
+        for i, def in ipairs(survival.registered_states) do
+            if (def.enabled) then
+                local name = def.name;
+                survival.reset_player_state(plname, name);
+                if hudbar_active[plname] then
+                    hb.unhide_hudbar(player, name);
+                end
+            end
+        end
+    end
+    survival.active = true
+end
+
+survival.disable = function()
+    for _,player in pairs(minetest.get_connected_players()) do
+        local inv = player:get_inventory();
+        local plname = player:get_player_name();
+        for i, def in ipairs(survival.registered_states) do
+            if (def.enabled) then
+                local name = def.name;
+                survival.reset_player_state(plname, name);
+                if hudbar_active[plname] then
+                    hb.hide_hudbar(player, name);
+                end
+            end
+        end
+    end
+    survival.active = false
+end
+
 survival.get_player_state = function ( name, stname )
     if (name and stname and player_states[name]) then
         return player_states[name][stname];
@@ -89,7 +125,6 @@ minetest.register_chatcommand("s", chat_cmd_def);
 
 local timer = 0;
 local MAX_TIMER = 0.5;
-local hudbar_active = {}
 
 minetest.register_globalstep(function ( dtime )
 
@@ -98,18 +133,20 @@ minetest.register_globalstep(function ( dtime )
     local tmr = timer;
     timer = 0;
 
-    for _,player in pairs(minetest.get_connected_players()) do
-        local inv = player:get_inventory();
-        local plname = player:get_player_name();
-        for i, def in ipairs(survival.registered_states) do
-            if (def.enabled) then
-                local name = def.name;
-                local state = player_states[plname][name];
-                if (def.on_update) then
-                    def.on_update(tmr, player, state);
-                end
-                if hudbar_active[plname] then
-                    hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
+    if survival.active then
+        for _,player in pairs(minetest.get_connected_players()) do
+            local inv = player:get_inventory();
+            local plname = player:get_player_name();
+            for i, def in ipairs(survival.registered_states) do
+                if (def.enabled) then
+                    local name = def.name;
+                    local state = player_states[plname][name];
+                    if (def.on_update) then
+                        def.on_update(tmr, player, state);
+                    end
+                    if hudbar_active[plname] then
+                        hb.change_hudbar(player, name, math.floor(def.get_scaled_value(state)));
+                    end
                 end
             end
         end
@@ -138,7 +175,7 @@ minetest.register_on_joinplayer(function ( player )
     minetest.after(0.5, function ( self )
         for i, def in ipairs(survival.registered_states) do
             local name = def.name;
-            hb.init_hudbar(player, name, math.floor(def.get_scaled_value(player_states[plname][def.name])), 100, false);
+            hb.init_hudbar(player, name, math.floor(def.get_scaled_value(player_states[plname][def.name])), 100, not survival.active);
             hudbar_active[plname] = true;
         end
     end);
