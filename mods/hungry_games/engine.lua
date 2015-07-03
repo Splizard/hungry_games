@@ -10,6 +10,7 @@ local voters = {}
 local currGame = {}
 local gameSequenceNumber = 0	--[[ Sequence number of current round, will be incremented each round.
 				     Used to determine whether minetest.after calls are still valid or should be discarded. ]]
+local voteSequenceNumber = 0
 
 local spots_shuffled = {}
 
@@ -149,11 +150,9 @@ local check_win = function()
 		if count <= 1 then
 			local winnerName
 			for playerName,_ in pairs(currGame) do
-				local winnerPos = minetest.get_player_by_name(playerName):getpos()
-				winnerName = playerName
-				
-				minetest.chat_send_player(winnerName, "You Won!")
-				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner")
+				local winnerName = playerName
+				minetest.chat_send_player(winnerName, "You won!")
+				minetest.chat_send_all("The Hungry Games are now over, " .. winnerName .. " was the winner.")
 				minetest.sound_play("hungry_games_victory")
 			end
 		
@@ -164,6 +163,19 @@ local check_win = function()
 				minetest.set_player_privs(name, privs)
 			end
 			
+			stop_game()
+		end
+	elseif starting_game then
+		local players = minetest.get_connected_players()
+		if #players < 2 then
+			if #players == 1 then
+				local winnerName = players[1]:get_player_name()
+				minetest.chat_send_player(winnerName, "You won! (All other players have left.)")
+				minetest.sound_play("hungry_games_victory")
+
+				local privs = minetest.get_player_privs(winnerName)
+				minetest.set_player_privs(winnerName, privs)
+			end
 			stop_game()
 		end
 	end
@@ -469,6 +481,11 @@ minetest.register_on_leaveplayer(function(player)
    	local privs = minetest.get_player_privs(name)
 	if voters[name] and votes > 0 then
 		votes = votes - 1
+		voters[name] = nil
+	end
+	if votes < 2 and timer_mode == "vote" then
+		unset_timer()
+		minetest.chat_send_all("Automatic game start has been aborted; there are less than 2 votes.")
 	end
 	if registrants[name] then registrants[name] = nil end
 	minetest.after(1, function()
@@ -657,11 +674,12 @@ minetest.register_chatcommand("vote", {
 				minetest.chat_send_all("The match will automatically be initiated in " .. math.floor(hungry_games.vote_countdown/60) .. " minutes " .. math.fmod(hungry_games.vote_countdown, 60) .. " seconds.")
 				force_init_warning = true
 				set_timer("vote", hungry_games.vote_countdown)
-				minetest.after(hungry_games.vote_countdown, function (gsn) 
-					if not (starting_game or ingame and gsn == gameSequenceNumber) then
+				voteSequenceNumber = voteSequenceNumber + 1
+				minetest.after(hungry_games.vote_countdown, function (gsn, vsn)
+					if not (starting_game or ingame and gsn == gameSequenceNumber) and timer_mode == "vote" and voteSequenceNumber == vsn then
 						start_game()
 					end
-				end, gameSequenceNumber)
+				end, gameSequenceNumber, voteSequenceNumber)
 			end
 		else
 			minetest.chat_send_player(name, "Already ingame!")
