@@ -188,6 +188,7 @@ local check_win = function()
 			end
 			
 			stop_game()
+			update_votebars()
 		end
 	end
 end
@@ -585,6 +586,7 @@ minetest.register_chatcommand("hg", {
 		elseif parms[1] == "stop" then
 			if starting_game or ingame then
 				stop_game()
+				update_votebars()
 				minetest.chat_send_all("The Hunger Games have been stopped!")
 			else
 				minetest.chat_send_player(name, "The game has already been stopped.")
