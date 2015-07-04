@@ -524,6 +524,7 @@ minetest.register_on_leaveplayer(function(player)
 	if votes < 2 and timer_mode == "vote" then
 		unset_timer()
 		minetest.chat_send_all("Automatic game start has been aborted; there are less than 2 votes.")
+		force_init_warning = false
 	end
 	update_votebars()
 	if registrants[name] then registrants[name] = nil end
