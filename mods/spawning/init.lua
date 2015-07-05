@@ -50,6 +50,12 @@ function spawning.set_spawn(place, pos)
 	spawning.save_spawns()
 end
 
+--Remove spawn pos
+function spawning.unset_spawn(place)
+	registered_spawns[place] = nil
+	spawning.save_spawns()
+end
+
 function spawning.is_spawn(place)
 	local spawn = registered_spawns[place]
 	if not spawn then return false else return true end
