@@ -54,7 +54,7 @@ end
 local end_grace = function(gsn)
 	if ingame and gsn == gameSequenceNumber then
 		minetest.setting_set("enable_pvp", "true")
-		minetest.chat_send_all("Grace peroid over!")
+		minetest.chat_send_all("Grace period over!")
 		grace = false
 		unset_timer()
 		minetest.sound_play("hungry_games_grace_over")
