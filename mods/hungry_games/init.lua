@@ -38,7 +38,7 @@ hungry_games = {}
 hungry_games.countdown = 10
 
 --Set grace period length in seconds (or 0 for no grace period)
-hungry_games.grace_period = 60
+hungry_games.grace_period = 90
 
 --Set what happens when a player dies during a match.
 --Possible values are: "spectate" or "lobby"
@@ -83,7 +83,7 @@ random_chests.enable()
 --Set the boundary where chests are spawned
 --Should be set to the same or smaller then the arena.
 --Defaults to whole map.
-random_chests.set_boundary(200)
+random_chests.set_boundary(400)
 
 --Set Chest Rarity.
 --Rarity is how many chests per chunk.
