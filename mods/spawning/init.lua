@@ -25,7 +25,7 @@ if input then
 			end
 		until false
 		registered_spawns[i] = {
-			pos={x=parms[1],y=parms[2],z=parms[3]}
+			pos={x=tonumber(parms[1]),y=tonumber(parms[2]),z=tonumber(parms[3])}
 		}
 	end
 	io.close(input)
