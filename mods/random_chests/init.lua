@@ -1,8 +1,8 @@
 local random_items = {}
 local chest_rarity = 3
 local chests_spawn = true
-local chests_abm = false
-local chests_nodetimer = false
+local chests_abm = true
+local chests_nodetimer = true
 local chests_interval = nil
 local chests_boundary = false
 
